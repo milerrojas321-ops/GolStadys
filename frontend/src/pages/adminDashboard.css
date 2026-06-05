@@ -1,0 +1,248 @@
+/* ==========================================================================
+   PANEL DE ADMINISTRACIÓN PREMIUM - GOLSTADYS (VAR & CONTROL)
+   ========================================================================== */
+
+.contenedor-admin {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at 50% 0%, #0d192e 0%, #050811 100%);
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  overflow: hidden;
+}
+
+/* NAVBAR DEL PANEL DE CONTROL */
+.navbar-admin {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: rgba(10, 15, 28, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 255, 136, 0.12);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+.badge-rol {
+  background: linear-gradient(135deg, #00ff88 0%, #00bfff 100%);
+  color: #050811;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+/* ÁREA DE CONTENIDO FLUIDA */
+.espacio-admin {
+  flex-grow: 1;
+  padding: 35px 40px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* CONTADORES EN TIEMPO REAL (KPIs) */
+.fila-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  animation: fadeInDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kpi-card {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.kpi-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kpi-titulo {
+  color: #64748b;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-valor {
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+/* Pulso de actividad del sistema */
+.pulso-var {
+  width: 8px;
+  height: 8px;
+  background-color: #00ff88;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+  animation: pulsoNeonAdmin 1.8s infinite;
+}
+
+/* GRILLA MAESTRA DE HERRAMIENTAS ADM */
+.grilla-herramientas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tarjetas de herramientas estilo consola */
+.tarjeta-control-premium {
+  background: rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 20px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 240px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Resplandor trasero sutil al hacer hover */
+.tarjeta-control-premium::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0, 255, 136, 0.03) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.tarjeta-control-premium:hover {
+  transform: translateY(-6px) scale(1.01);
+  background: rgba(20, 32, 59, 0.5);
+  border-color: rgba(0, 255, 136, 0.25);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 255, 136, 0.03);
+}
+
+.tarjeta-control-premium:hover::after {
+  opacity: 1;
+}
+
+/* Indicadores de diseño internos */
+.cabecera-tarjeta-adm {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+}
+
+.vector-linea-status {
+  width: 35px;
+  height: 4px;
+  background: #1e293b;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.tarjeta-control-premium:hover .vector-linea-status {
+  background: #00ff88;
+  width: 50px;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.cuerpo-tarjeta-adm h3 {
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+
+.cuerpo-tarjeta-adm p {
+  color: #64748b;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.footer-tarjeta-adm {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badge-modulo {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.flecha-interactiva {
+  color: #334155;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.tarjeta-control-premium:hover .flecha-interactiva {
+  color: #00ff88;
+  transform: translateX(5px);
+}
+
+/* SECCIONES INTERNAS ACTIVAS (FORMULARIOS / VISTAS) */
+.contenedor-vista-modulo {
+  background: rgba(11, 19, 36, 0.5);
+  border: 1px solid rgba(0, 255, 136, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 40px;
+  animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   ANIMACIONES KEYFRAMES
+   ========================================================================== */
+
+@keyframes pulsoNeonAdmin {
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.6); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
