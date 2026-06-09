@@ -9,31 +9,115 @@ function Login({ alIniciarSesion }) {
   const [codigoEnviado, setCodigoEnviado] = useState(false);
   const [requierePerfil, setRequierePerfil] = useState(false);
   const [nombreCompleto, setNombreCompleto] = useState('');
+  
+  // Estados añadidos para dar feedback visual de carga o errores
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState('');
 
-  const manejarEnvioCorreo = (e) => {
+  // PASO 1: Solicitar código OTP al Backend
+  const manejarEnvioCorreo = async (e) => {
     e.preventDefault();
-    if (correo) {
+    if (!correo) return;
+
+    setCargando(true);
+    setError('');
+
+    try {
+      const respuesta = await fetch('http://localhost:5000/api/auth/solicitar-codigo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correo_electronico: correo })
+      });
+
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        throw new Error(datos.error || 'Error al solicitar el código');
+      }
+
       console.log(`Solicitando código para: ${correo}`);
-      setCodigoEnviado(true);
-    }
-  };
-
-  const manejarVerificarCodigo = (e) => {
-    e.preventDefault();
-    if (codigoOtp) {
-      console.log(`Verificando código: ${codigoOtp}`);
-      // Simulamos que el backend detecta que es un usuario nuevo:
-      setRequierePerfil(true);
-    }
-  };
-
-  const manejarGuardarPerfil = (e) => {
-    e.preventDefault();
-    if (nombreCompleto) {
-      console.log(`Guardando perfil para: ${nombreCompleto}`);
       
-      // Activa el interruptor en App.jsx para pasar al Menú Principal
+      // 🚨 CORRECCIÓN AQUÍ: No activamos el perfil todavía. 
+      // Solo guardamos la bandera y activamos que el código fue enviado para ir al Paso 2.
+      setRequierePerfil(datos.requiereRegistroCompleto); 
+      setCodigoEnviado(true); 
+      
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  // PASO 2: Verificar el código OTP digitado por el usuario
+  const manejarVerificarCodigo = async (e) => {
+    e.preventDefault();
+    if (!codigoOtp) return;
+
+    setCargando(true);
+    setError('');
+
+    try {
+      const respuesta = await fetch('http://localhost:5000/api/auth/verificar-codigo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correo_electronico: correo, codigo_otp: codigoOtp })
+      });
+
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        throw new Error(datos.error || 'Código incorrecto o expirado');
+      }
+
+      console.log(`Verificando código: ${codigoOtp}`);
+      
+      if (datos.token) {
+        localStorage.setItem('token_golstadys', datos.token);
+      }
+
+      // 🚨 CORRECCIÓN AQUÍ: Evaluamos la bandera guardada después de que el OTP sea exitoso
+      if (requierePerfil) {
+        // Si el backend dijo en el Paso 1 que no tenía nombre, ocultamos el OTP y abrimos el formulario del perfil
+        setCodigoEnviado(false); 
+      } else {
+        // Si ya es un usuario antiguo con nombre completo, entra directo al estadio
+        alIniciarSesion();
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  // PASO 3: Guardar el perfil inicial (Nombre Completo) de los usuarios nuevos
+  const manejarGuardarPerfil = async (e) => {
+    e.preventDefault();
+    if (!nombreCompleto) return;
+
+    setCargando(true);
+    setError('');
+
+    try {
+      const respuesta = await fetch('http://localhost:5000/api/auth/completar-perfil', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correo_electronico: correo, nombre_completo: nombreCompleto })
+      });
+
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        throw new Error(datos.error || 'Error al guardar el nombre');
+      }
+
+      console.log(`Guardando perfil para: ${nombreCompleto}`);
       alIniciarSesion();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -51,8 +135,15 @@ function Login({ alIniciarSesion }) {
           />
           <p className="subtitulo">Tu pase directo a los mejores pronósticos</p>
         </div>
+
+        {/* Notificación de errores en caso de fallos de red o datos inválidos */}
+        {error && (
+          <div style={{ backgroundColor: '#ef444422', border: '1px solid #ef4444', color: '#f87171', padding: '10px', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '15px', textAlign: 'center' }}>
+            {error}
+          </div>
+        )}
         
-        {/* PASO 1: Pedir Correo */}
+        {/* PASO 1: Pedir Correo (Solo visible al inicio) */}
         {!codigoEnviado && !requierePerfil && (
           <form onSubmit={manejarEnvioCorreo} className="formulario">
             <div className="grupo-input">
@@ -63,17 +154,18 @@ function Login({ alIniciarSesion }) {
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
                 required
+                disabled={cargando}
                 className="input"
               />
             </div>
-            <button type="submit" className="boton-principal">
-              Enviar Código de Acceso
+            <button type="submit" disabled={cargando} className="boton-principal">
+              {cargando ? 'Solicitando...' : 'Enviar Código de Acceso'}
             </button>
           </form>
         )}
 
-        {/* PASO 2: Pedir OTP */}
-        {codigoEnviado && !requierePerfil && (
+        {/* 🚨 PASO 2: Pedir OTP (CORREGIDO: Se muestra siempre que se envíe el código, para cualquier rol) */}
+        {codigoEnviado && (
           <form onSubmit={manejarVerificarCodigo} className="formulario">
             <div className="alerta-envio">
               Hemos enviado un código de 6 dígitos a: <br />
@@ -89,17 +181,19 @@ function Login({ alIniciarSesion }) {
                 value={codigoOtp}
                 onChange={(e) => setCodigoOtp(e.target.value)}
                 required
+                disabled={cargando}
                 className="input input-centrado"
               />
             </div>
             
-            <button type="submit" className="boton-principal">
-              Ingresar al Estadio
+            <button type="submit" disabled={cargando} className="boton-principal">
+              {cargando ? 'Verificando...' : 'Ingresar al Estadio'}
             </button>
             
             <button 
               type="button" 
-              onClick={() => setCodigoEnviado(false)}
+              onClick={() => { setCodigoEnviado(false); setRequierePerfil(false); setError(''); }}
+              disabled={cargando}
               className="boton-volver"
             >
               Cambiar correo electrónico
@@ -107,8 +201,8 @@ function Login({ alIniciarSesion }) {
           </form>
         )}
 
-        {/* PASO 3: Post-Registro */}
-        {requierePerfil && (
+        {/* 🚨 PASO 3: Post-Registro (CORREGIDO: Solo se activa cuando el código ya se verificó con éxito y requierePerfil quedó activo en solitario) */}
+        {!codigoEnviado && requierePerfil && (
           <form onSubmit={manejarGuardarPerfil} className="formulario">
             <div className="alerta-envio">
               ¡Felicidades! Tu correo ha sido verificado.
@@ -128,12 +222,13 @@ function Login({ alIniciarSesion }) {
                 value={nombreCompleto}
                 onChange={(e) => setNombreCompleto(e.target.value)}
                 required
+                disabled={cargando}
                 className="input"
               />
             </div>
             
-            <button type="submit" className="boton-principal">
-              Empezar a Jugar
+            <button type="submit" disabled={cargando} className="boton-principal">
+              {cargando ? 'Guardando...' : 'Empezar a Jugar'}
             </button>
           </form>
         )}

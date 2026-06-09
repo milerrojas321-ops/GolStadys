@@ -17,10 +17,123 @@ body, html, #root {
 }
 
 
+
+
+.boton-logout-icono {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a0aec0;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Efecto Hover: Alerta destructiva en rojo neón */
+.boton-logout-icono:hover {
+  background: rgba(255, 68, 68, 0.08);
+  border-color: #ff4444;
+  color: #ff4444;
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(255, 68, 68, 0.3);
+}
+
+/* Efecto de presión al hacer clic */
+.boton-logout-icono:active {
+  transform: scale(0.95);
+}
+
+/* Comportamiento del vector SVG */
+.icono-logout {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.2s ease;
+}
+
+.boton-logout-icono:hover .icono-logout {
+  transform: translateX(2px); /* Pequeño empuje animado hacia afuera */
+}
+
+/* Alineación de la caja de acciones en el header */
+
+
+.usuario-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Alinea todo estrictamente hacia la derecha */
+  gap: 12px; /* Espaciado perfecto para que no se pisen */
+  min-width: 240px; /* Evita que el contenedor colapse el tamaño de los iconos */
+}
+
+
+
+/* ========================================================
+   BOTÓN HOME (CASITA) EN LA NAVBAR SUPERIOR
+   ======================================================== */
+
+.boton-home-nav, .boton-logout-icono {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a0aec0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.boton-home-nav, .boton-logout-icono {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a0aec0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Efecto al pasar el cursor (Hover) */
+.boton-home-nav:hover {
+  background: rgba(0, 255, 136, 0.08);
+  border-color: #00ff88;
+  color: #00ff88;
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.25);
+}
+
+/* Efecto al darle clic */
+.boton-home-nav:active {
+  transform: scale(0.95);
+}
+
+/* Estilo del vector SVG interno */
+.icono-casita {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.2s ease;
+}
+
+.boton-home-nav:hover .icono-casita {
+  transform: scale(1.05);
+}
+
+
 .contenedor-dashboard {
   width: 100vw;
   height: 100vh;
-  background-image: url('../assets/mundial.jpg');
+  background-image: url('../assets/mundial.png');
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
@@ -41,15 +154,13 @@ body, html, #root {
 /* NAVBAR SUPERIOR FLOTANTE */
 .navbar-superior {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 15px 40px;
-  background: rgba(10, 15, 28, 0.6);
+  justify-content: space-between; /* Distribuye: Logo Izq | Título Centro | Botones Der */
+  width: 100%;
+  padding: 10px 24px;
+  background: rgba(10, 15, 24, 0.6);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(0, 255, 136, 0.08);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
-  z-index: 100;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .logo-contenedor {
@@ -74,27 +185,6 @@ body, html, #root {
   gap: 20px;
 }
 
-.boton-logout-premium {
-  background: rgba(0, 0, 0, 0.014);
-  border: 1px solid rgba(68, 173, 239, 0.2);
-  color: #2d79d1;
-  padding: 8px 18px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.boton-logout-premium:hover {
-  background: #0000006c;
-  color: #ffffff;
-  box-shadow: 0 0 15px rgba(68, 148, 239, 0.4);
-  transform: translateY(-1px);
-}
-
 /* AREA CENTRAL DE CONTENIDO */
 .espacio-contenido {
   flex-grow: 1;
@@ -108,7 +198,6 @@ body, html, #root {
   margin: 0 auto;
 }
 
-/* Cabecera del Contenido Dinámico */
 .bienvenida-header {
   animation: fadeInDown 0.6s ease-out;
 }
@@ -119,18 +208,22 @@ body, html, #root {
   font-weight: 800;
   letter-spacing: -0.5px;
   margin-bottom: 8px;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 75%);
+  text-align: center; 
+  padding: 10px 20px; 
 }
 
-.bienvenida-header p {
-  color: #ffffff;
-  font-size: 1.05rem;
-}
-
+/* --- CLASE ACTUALIZADA CON ANIMACIÓN Y TRANSICIÓN --- */
 .resaltado-neon {
   color: #00ff88;
-  text-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
+  display: inline-block; /* Requisito para que la transformación de escala (transform) funcione */
+  
+  /* Asigna la animación: nombre, duración, ciclo infinito y suavizado */
+  animation: pulsoNeon 2s infinite ease-in-out;
+  
+  /* Transición suave por si en el futuro cambias el color con un :hover */
+  transition: all 0.3s ease;
 }
-
 /* SECCIÓN PRINCIPAL: GRILLA DE TARJETAS (Navegación Interactiva) */
 .grilla-navegacion {
   display: grid;
@@ -142,8 +235,8 @@ body, html, #root {
 
 /* Tarjeta de Menú Estilo "Videojuego" */
 .tarjeta-menu-premium {
-  background: rgba(15, 23, 42, 0.623);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: linear-gradient(135deg, rgba(20, 30, 54, 0.85) 0%, rgba(10, 15, 28, 0.9) 100%);
+  border: 1px solid rgba(75, 195, 255, 0.25); /* Borde inicial más sutil para que el hover impacte más */
   border-radius: 16px;
   padding: 30px 24px;
   display: flex;
@@ -153,7 +246,29 @@ body, html, #root {
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  
+  /* Efecto cristal (Blur de fondo) */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  /* Transición ultra suave de salida */
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ANIMACIÓN DE ENTRADA AL CARGAR EL ESTADIO */
+  animation: tarjetaEntrada 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.tarjeta-menu-premium::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top right, rgba(0, 255, 136, 0.15) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 1;
 }
 
 /* Línea de decoración neón oculta que se ilumina al hacer hover */
@@ -167,46 +282,57 @@ body, html, #root {
   background: linear-gradient(90deg, #00ff88, #00bfff);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.4s ease;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2; /* Por encima de la luz */
 }
 
 /* Hover de la Tarjeta */
 .tarjeta-menu-premium:hover {
-  transform: translateY(-5px) scale(1.02);
-  background: rgba(20, 30, 54, 0.6);
-  border-color: rgba(0, 255, 136, 0.2);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 136, 0.05);
+  transform: translateY(-8px) scale(1.02); /* Un poquito más de elevación */
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(8, 12, 21, 0.98) 100%);
+  border-color: rgba(0, 255, 136, 0.5); /* Borde neón más vivo */
+  
+  /* Sombra externa pesada + resplandor neón sutil */
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 
+              0 0 25px rgba(0, 255, 136, 0.15);
 }
 
 .tarjeta-menu-premium:hover::before {
   transform: scaleX(1);
 }
 
+.tarjeta-menu-premium:hover::after {
+  opacity: 1; /* Enciende la luz interna del fondo */
+}
 /* Estado cuando la tarjeta está seleccionada como vista activa */
 .tarjeta-menu-premium.seleccionada {
-  background: rgba(0, 255, 136, 0.04);
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.06) 0%, rgba(10, 15, 28, 0.95) 100%);
   border-color: #00ff88;
-  box-shadow: 0 0 25px rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 30px rgba(0, 255, 136, 0.2), inset 0 0 15px rgba(0, 255, 136, 0.05);
 }
 
 /* Iconos de Categoria en CSS (Geométricos) */
 .icono-vectorial {
-  width: 45px;
-  height: 45px;
-  border-radius: 10px;
+  width: 48px; /* Un pelín más grande */
+  height: 48px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 20px;
-  transition: all 0.3s ease;
+  color: #94a3b8;
+  position: relative;
+  z-index: 3;
+  transition: all 0.4s ease;
 }
 
 .tarjeta-menu-premium:hover .icono-vectorial {
-  background: rgba(0, 255, 136, 0.1);
-  border-color: rgba(0, 255, 136, 0.3);
+  background: rgba(0, 255, 136, 0.15);
+  border-color: #00ff88;
   color: #00ff88;
+  transform: rotate(5deg) scale(1.05); /* Pequeño giro gamer dinámico */
 }
 
 .vector-dot {
@@ -214,12 +340,14 @@ body, html, #root {
   height: 8px;
   background: #64748b;
   border-radius: 50%;
-  transition: all 0.3s ease;
+  position: relative;
+  z-index: 3;
+  transition: all 0.4s ease;
 }
 
 .tarjeta-menu-premium:hover .vector-dot {
   background: #00ff88;
-  box-shadow: 0 0 8px #00ff88;
+  box-shadow: 0 0 12px #00ff88, 0 0 4px #00ff88;
 }
 
 /* Detalles de Texto Internos */
@@ -242,49 +370,253 @@ body, html, #root {
   font-weight: 400;
 }
 
-/* SECCIÓN INFERIOR: RESUMEN DE ESTADÍSTICAS EN TIEMPO REAL */
+/* ==========================================
+   SECCIÓN INFERIOR Y MÓDULOS DE GOLSTADYS 
+   ========================================== */
+
 .panel-inferior-resumen {
   display: flex;
   gap: 20px;
   margin-top: auto;
-  animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Animación de entrada fluida para todo el panel */
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* --- TARJETA LIVE FEED REPOTENCIADA --- */
 .card-live-feed {
   flex: 1;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.518) 0%, rgba(30, 41, 59, 0.1) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.02);
+  background: linear-gradient(135deg, rgba(13, 27, 65, 0.8) 0%, rgba(4, 12, 31, 0.85) 100%);
+  border-left: 4px solid #00ff88;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
-  padding: 20px;
+  padding: 18px 22px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 18px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.card-live-feed:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(135deg, rgba(18, 36, 84, 0.85) 0%, rgba(6, 17, 43, 0.9) 100%);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 255, 136, 0.1);
+}
+
+/* --- INDICADOR EN VIVO (EFECTO ONDA DE RADAR) --- */
 .indicador-pulso {
-  width: 15px;
-  height: 15px;
+  width: 12px;
+  height: 12px;
   background-color: #00ff88;
   border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
-  animation: pulsoNeon 1.6s infinite;
+  position: relative;
+  box-shadow: 0 0 10px #00ff88;
+  flex-shrink: 0;
 }
 
-/* Vistas de secciones secundarias cuando no estás en 'inicio' */
+.indicador-pulso::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #00ff88;
+  animation: pulsoOnda 2s infinite cubic-bezier(0.25, 0, 0, 1);
+  z-index: -1;
+}
+
+/* --- NUEVA VISTA MÓDULO VACÍO/CARGANDO (DISEÑO PREMIUM SOBRESALIENTE) --- */
 .vista-modulo-vacio {
-  background: rgba(10, 15, 30, 0.4);
-  border: 1px dashed rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 60px;
+  /* Fondo oscuro semi-transparente premium */
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(8, 12, 21, 0.85) 100%);
+  
+  /* Borde sutil acentuado */
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 20px;
+  padding: 60px 40px;
   text-align: center;
-  color: #475569;
-  font-size: 1.1rem;
-  animation: fadeIn 0.4s ease;
+  
+  /* Color de texto más claro para que resalte bien la lectura */
+  color: #e2e8f0; 
+  font-size: 1.15rem;
+  font-weight: 500;
+  
+  /* Desenfoque de cristal ultra profundo */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  
+  /* Sombra pesada para que parezca flotar sobre el estadio */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7),
+              0 0 30px rgba(0, 255, 136, 0.03);
+              
+  position: relative;
+  overflow: hidden;
+  
+  /* NUEVA ANIMACIÓN CINEMÁTICA DE ESCALA */
+  animation: scaleUpFade 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Efecto de haz de luz decorativo interno */
+.vista-modulo-vacio::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0, 255, 136, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+
+
+/* ========================================================
+   CONTENEDOR DINÁMICO CON SCROLL INTEGRADO (ANTI-RECORTE)
+   ======================================================== */
+
+.contenedor-vista-modulo-activa {
+  width: 100%;
+  
+  /* Calcula el espacio disponible: altura total menos el espacio que ocupa el botón y el título superior */
+  max-height: calc(100vh - 260px); 
+  
+  /* Habilita el scroll vertical solo cuando el contenido se desborda */
+  overflow-y: auto;
+  
+  /* Evita desbordamiento horizontal molesto */
+  overflow-x: hidden;
+  
+  /* Espaciado interno inferior para que la última tarjeta no pegue contra el borde de la pantalla */
+  padding-bottom: 40px;
+  
+  /* Suaviza el scroll en dispositivos táctiles o touchpads */
+  scroll-behavior: smooth;
+}
+
+/* --- DISEÑO DE LA BARRA DE DESPLAZAMIENTO (SCROLLBAR PREMIUM) --- */
+
+/* 1. Ancho de la barra */
+.contenedor-vista-modulo-activa::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* 2. Fondo del canal de la barra (Sutil y traslúcido) */
+.contenedor-vista-modulo-activa::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+}
+
+/* 3. El indicador / "Agarrador" de la barra (Glow Neón Estilo GolStadys) */
+.contenedor-vista-modulo-activa::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 136, 0.3); 
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.3s ease;
+}
+
+/* 4. Efecto hover al pasar el mouse por la barra */
+.contenedor-vista-modulo-activa::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 136, 0.6);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.seccion-actual-navbar {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none; /* Evita que interfiera con clics cercanos */
+}
+
+.titulo-modulo-nav {
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin: 0;
+  text-transform: uppercase;
+  animation: fadeInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.resaltado-neon-nav {
+  color: #00ff88;
+  text-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
+}
+
+/* Ajuste preventivo para la Navbar Superior por si no tenía flex-properties */
+.navbar-superior {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Animación sutil de caída para el título al cambiar de sección */
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ==========================================
+   DEFINICIÓN DE ANIMACIONES (KEYFRAMES)
+   ========================================== */
+
+@keyframes pulsoOnda {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3.5); opacity: 0; }
+}
+
+@keyframes scaleUpFade {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ==========================================================================
    ANIMACIONES MODERNAS (Keyframes)
    ========================================================================== */
+
+@keyframes tarjetaEntrada {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 @keyframes pulsoNeon {
   0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
@@ -313,3 +645,28 @@ body, html, #root {
   .espacio-contenido { padding: 20px; }
   .panel-inferior-resumen { flex-direction: column; }
 }
+@keyframes pulsoNeon {
+  0% {
+    transform: scale(1);
+    text-shadow:  0 0 12px rgba(0, 255, 136, 0.4),
+                  0 0 25px rgba(0, 255, 136, 0.2);
+  }
+  50% {
+    /* El texto crece un 4% sutilmente y aumenta el brillo de fondo */
+    transform: scale(1.08);
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.7),
+                  0 0 40px rgba(0, 255, 136, 0.4),
+                  0 0 60px rgba(0, 255, 136, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    text-shadow:  0 0 12px rgba(0, 255, 136, 0.4),
+                  0 0 25px rgba(0, 255, 136, 0.2);
+  }
+}
+
+
+.tarjeta-menu-premium:nth-child(1) { animation-delay: 0.1s; }
+.tarjeta-menu-premium:nth-child(2) { animation-delay: 0.2s; }
+.tarjeta-menu-premium:nth-child(3) { animation-delay: 0.3s; }
+.tarjeta-menu-premium:nth-child(4) { animation-delay: 0.4s; }

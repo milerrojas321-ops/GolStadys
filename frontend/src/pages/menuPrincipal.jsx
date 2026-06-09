@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import logoGolStadys from '../assets/logosinletras.png';
-import './menuPrincipal.css'; // Integración de la nueva hoja de estilos
+import './menuPrincipal.css';
+import Campeonatos from './campeonatos';
 
 function MenuPrincipal() {
   const [seccionActiva, setSeccionActiva] = useState('inicio');
 
-  // Definición de las secciones sin emojis, usando metadatos limpios
   const modulosDashboard = [
     { id: 'campeonatos', titulo: 'Campeonatos', desc: 'Explorar ligas y torneos activos' },
     { id: 'pronosticos', titulo: 'Pronósticos', desc: 'Gestionar tus marcadores y apuestas' },
@@ -16,8 +16,10 @@ function MenuPrincipal() {
   return (
     <div className="contenedor-dashboard">
       
-      {/* NAVBAR SUPERIOR COHESIVA */}
+      {/* NAVBAR SUPERIOR */}
       <header className="navbar-superior">
+        
+        {/* LADO IZQUIERDO: SOLO EL LOGO */}
         <div className="logo-contenedor">
           <img 
             src={logoGolStadys} 
@@ -27,28 +29,78 @@ function MenuPrincipal() {
             style={{ cursor: 'pointer' }}
           />
         </div>
+
+        {/* CENTRO: TÍTULO DINÁMICO */}
+        <div className="seccion-actual-navbar">
+          {seccionActiva !== 'inicio' && (
+            <h2 className="titulo-modulo-nav">
+              Módulo: <span className="resaltado-neon-nav">{modulosDashboard.find(m => m.id === seccionActiva)?.titulo}</span>
+            </h2>
+          )}
+        </div>
+
+        {/* LADO DERECHO: TODO EL GRUPO DE ACCIONES JUNTO */}
         <div className="usuario-acciones">
+          
+          {/* 🏠 LA CASITA: Ahora empaquetada estrictamente a la derecha con los demás iconos */}
+          {seccionActiva !== 'inicio' && (
+            <button 
+              className="boton-home-nav"
+              onClick={() => setSeccionActiva('inicio')}
+              title="Volver al Menú Principal"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className="icono-casita"
+              >
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+            </button>
+          )}
+
+          {/* Botón icónico de salir */}
           <button 
-            onClick={() => alert('Sesión finalizada de forma segura.')} 
-            className="boton-logout-premium"
+            className="boton-logout-icono"
+            onClick={() => {
+              if(window.confirm('¿Seguro que deseas salir del Estadio GolStadys?')) {
+                alert('Sesión finalizada de forma segura.');
+              }
+            }}
+            title="Cerrar Sesión"
           >
-            Salir del Estadio
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className="icono-logout"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
           </button>
         </div>
       </header>
 
-      {/* ESPACIO DINÁMICO DE CONTENIDO */}
+      {/* CONTENEDOR DE CONTENIDO */}
       <main className="espacio-contenido">
-        
         {seccionActiva === 'inicio' ? (
           <>
-            {/* Cabecera de bienvenida */}
             <div className="bienvenida-header">
               <h2>¡Bienvenido al Estadio, <span className="resaltado-neon">Crack</span>!</h2>
-              <p>Selecciona un módulo a continuación para gestionar tus operaciones futbolísticas.</p>
             </div>
 
-            {/* GRILLA DE SECCIONES (Sustituye al menú vertical colapsado) */}
             <div className="grilla-navegacion">
               {modulosDashboard.map((modulo) => (
                 <div 
@@ -56,11 +108,9 @@ function MenuPrincipal() {
                   className="tarjeta-menu-premium"
                   onClick={() => setSeccionActiva(modulo.id)}
                 >
-                  {/* Icono vectorial abstracto generado por CSS */}
                   <div className="icono-vectorial">
                     <div className="vector-dot"></div>
                   </div>
-                  
                   <div className="info-meta">
                     <span className="titulo-meta">{modulo.titulo}</span>
                     <span className="subtitulo-meta">{modulo.desc}</span>
@@ -69,7 +119,6 @@ function MenuPrincipal() {
               ))}
             </div>
 
-            {/* SECCIÓN LIVE FEED (KPIs Inferiores fijos del inicio) */}
             <div className="panel-inferior-resumen">
               <div className="card-live-feed">
                 <div className="indicador-pulso"></div>
@@ -89,31 +138,19 @@ function MenuPrincipal() {
             </div>
           </>
         ) : (
-          /* VISTA CONTENEDORA PARA LOS MÓDULOS DE TRABAJO */
-          <div style={{ animation: 'fadeIn 0.5s ease', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <button 
-              className="boton-logout-premium" 
-              style={{ width: 'fit-content', borderColor: 'rgba(255,255,255,0.1)', color: '#fff', backgroundcolor: 'rgba(12, 1, 1, 0.43)' }}
-              onClick={() => setSeccionActiva('inicio')}
-            >
-              ← Volver al Dashboard
-            </button>
-            
-            <div className="bienvenida-header">
-              <h2>
-                Módulo: <span className="resaltado-neon">
-                  {modulosDashboard.find(m => m.id === seccionActiva)?.titulo}
-                </span>
-              </h2>
-            </div>
-
-            <div className="vista-modulo-vacio">
-              ⚙️ Entorno analítico en fase de desarrollo. Próxima vinculación de bases de datos.
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
+            <div className="contenedor-vista-modulo-activa">
+              {seccionActiva === 'campeonatos' && <Campeonatos />}
+              {seccionActiva !== 'campeonatos' && (
+                <div className="vista-modulo-vacio">
+                  ⚙️ Entorno analítico en fase de desarrollo. Próxima vinculación de bases de datos.
+                </div>
+              )}
             </div>
           </div>
         )}
-
       </main>
+
     </div>
   );
 }
