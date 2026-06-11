@@ -1,0 +1,224 @@
+/* src/pages/pronosticos.css */
+
+.pronosticos-contenedor {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+}
+
+.pronosticos-encabezado {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.pronosticos-titulo {
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.text-neon-verde {
+  color: #00ff88;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+}
+
+.pronosticos-subtitulo {
+  background: linear-gradient(135deg, #e5a97e 0%, #b87333 50%, #91532b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(184, 115, 51, 0.4));
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   🎴 GRID DE TARJETAS DE PRONÓSTICOS
+   ========================================================================== */
+.pronosticos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+/* Tarjeta Premium individual */
+.tarjeta-pronostico-premium {
+  position: relative;
+  background: linear-gradient(135deg, rgba(20, 24, 33, 0.95) 0%, rgba(12, 14, 20, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  
+  /* Animación de entrada escalonada */
+  animation: aparecerTarjeta 0.5s ease both;
+  animation-delay: calc(var(--anim-index) * 0.06s);
+}
+
+.tarjeta-pronostico-premium:hover {
+  transform: translateY(-6px);
+  border-color: rgba(0, 255, 136, 0.3);
+  box-shadow: 0 15px 30px rgba(0, 255, 136, 0.1);
+}
+
+/* Encabezado interno de la tarjeta */
+.tarjeta-apuesta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 10px;
+}
+
+.badge-torneo {
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: #a0aec0;
+}
+
+.badge-estado {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.badge-estado.pendiente {
+  background: rgba(217, 140, 82, 0.15);
+  color: #d98c52;
+  border: 1px solid rgba(217, 140, 82, 0.3);
+}
+
+/* Bloque central del marcador */
+.bloque-enfrentamiento {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 25px 0;
+}
+
+.equipo-bloque {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30%;
+  text-align: center;
+}
+
+.bandera-emoji {
+  font-size: 1.8rem;
+  margin-bottom: 6px;
+}
+
+.nombre-equipo {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+/* Display del marcador central fijado */
+.marcador-fijado-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.goles-display {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #00ff88;
+  text-shadow: 0 0 5px rgba(0, 255, 136, 0.3);
+}
+
+.vs-line {
+  color: #718096;
+  font-weight: 600;
+}
+
+/* Footer de la tarjeta */
+.tarjeta-apuesta-footer {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.texto-info-id {
+  font-size: 0.75rem;
+  color: #4a5568;
+}
+
+/* Efecto Reflejo Premium */
+.brillo-reflejo-apuesta {
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-20deg);
+  transition: 0.6s;
+}
+.tarjeta-pronostico-premium:hover .brillo-reflejo-apuesta {
+  left: 150%;
+}
+
+/* ==========================================================================
+   Estado vacío (No hay pronósticos)
+   ========================================================================== */
+.pronosticos-vacio {
+  text-align: center;
+  padding: 60px 20px;
+  background: rgba(15, 18, 25, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  margin-top: 30px;
+}
+
+.icono-vacio {
+  font-size: 3.5rem;
+  margin-bottom: 15px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.pronosticos-vacio h3 {
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+}
+
+.pronosticos-vacio p {
+  color: #718096;
+}
+
+/* ==========================================================================
+   Animaciones del Entorno
+   ========================================================================== */
+@keyframes aparecerTarjeta {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}

@@ -69,3 +69,13 @@ export const completarPerfil = async (req, res) => {
         return res.status(500).json({ error: 'Error interno del servidor.' });
     }
 };
+
+export const obtenerRanking = async (req, res) => {
+    try {
+        const ranking = await Usuario.obtenerRankingGlobal();
+        return res.status(200).json(ranking);
+    } catch (error) {
+        console.error('❌ Error al compilar el ranking:', error);
+        return res.status(500).json({ ok: false, mensaje: 'Error al recuperar la tabla de posiciones.' });
+    }
+};

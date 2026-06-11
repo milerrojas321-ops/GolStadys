@@ -1,0 +1,260 @@
+/* src/pages/ranking.css */
+
+.ranking-contenedor {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+}
+
+.ranking-encabezado {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.ranking-titulo {
+  font-size: 2.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.text-neon {
+  color: #00ff88;
+  text-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+}
+
+.ranking-subtitulo {
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+/* ==========================================================================
+   🏆 PODIO MEJORADO CON GLASSMORPHISM Y GRADIENTES
+   ========================================================================== */
+.podio-contenedor {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 25px;
+  margin-bottom: 60px;
+  padding: 20px;
+}
+
+.tarjeta-podio {
+  position: relative;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 30px 20px;
+  text-align: center;
+  width: 220px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.tarjeta-podio:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(0, 255, 136, 0.15);
+}
+
+/* Tamaños escalonados del podio */
+.tarjeta-podio.oro {
+  height: 300px;
+  border-color: rgba(253, 224, 71, 0.3);
+  background: linear-gradient(135deg, rgba(253, 224, 71, 0.08), rgba(30, 41, 59, 0.6));
+}
+
+.tarjeta-podio.plata {
+  height: 260px;
+  border-color: rgba(226, 232, 240, 0.3);
+  background: linear-gradient(135deg, rgba(226, 232, 240, 0.05), rgba(30, 41, 59, 0.6));
+}
+
+.tarjeta-podio.bronce {
+  height: 230px;
+  border-color: rgba(249, 115, 22, 0.3);
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.05), rgba(30, 41, 59, 0.6));
+}
+
+.corona-posicion {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+}
+
+.avatar-podio {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  font-size: 1.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nombre-podio {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.puntos-podio {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #00ff88;
+  margin-bottom: 15px;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.rango-badge {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+  color: #cbd5e1;
+}
+
+/* Efecto de reflejo brillante */
+.brillo-reflejo {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
+  transform: rotate(45deg);
+  transition: 0.5s;
+}
+.tarjeta-podio:hover .brillo-reflejo {
+  left: 100%;
+  top: 100%;
+}
+
+/* ==========================================================================
+   📊 TABLA DE POSICIONES ULTRA MODERNA
+   ========================================================================== */
+.tabla-ranking-contenedor {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 10px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.tabla-ranking-premium {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-ranking-premium th {
+  padding: 18px;
+  text-align: left;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  color: #64748b;
+  letter-spacing: 1px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.fila-ranking {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  transition: all 0.3s ease;
+  animation: entradaFluida 0.5s ease backwards;
+  animation-delay: calc(var(--anim-index) * 0.05s);
+}
+
+.fila-ranking:hover {
+  background: rgba(255, 255, 255, 0.03);
+  transform: translateX(5px);
+}
+
+.tabla-ranking-premium td {
+  padding: 16px 18px;
+}
+
+.col-posicion {
+  font-weight: 700;
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+.usuario-info-celda {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.mini-avatar {
+  font-size: 1.2rem;
+}
+
+.col-puntos {
+  color: #00ff88;
+  font-weight: 800;
+  font-size: 1.2rem;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.2);
+}
+
+.text-centro {
+  text-align: center;
+}
+
+.tabla-vacia {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+}
+
+/* Loader Animado */
+.ranking-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #94a3b8;
+}
+
+.spinner-golstadys {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(0, 255, 136, 0.1);
+  border-radius: 50%;
+  border-top-color: #00ff88;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes entradaFluida {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

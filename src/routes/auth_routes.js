@@ -3,7 +3,7 @@ import { solicitarCodigo, verificarCodigo, completarPerfil } from '../controller
 
 const router = Router();
 
-router.post('/solicitar-codigo', solicitarCodigo);
+router.post('/solicitar-otp', solicitarCodigo);
 router.post('/verificar-codigo', verificarCodigo);
 router.post('/completar-perfil', completarPerfil);
 

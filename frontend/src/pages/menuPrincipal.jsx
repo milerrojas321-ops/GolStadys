@@ -1,156 +1,176 @@
+// src/pages/menuPrincipal.jsx
 import React, { useState } from 'react';
 import logoGolStadys from '../assets/logosinletras.png';
 import './menuPrincipal.css';
 import Campeonatos from './campeonatos';
+import Ranking from './ranking';
+import Pronosticos from './pronosticos';
 
-function MenuPrincipal() {
+// Importación de Iconos Vectoriales PRO (Reemplazo total de emojis)
+import { 
+  Home, 
+  Trophy, 
+  Sparkles, 
+  BarChart3, 
+  TrendingUp, 
+  LogOut, 
+  User, 
+  ChevronRight, 
+  Calendar, 
+  Target 
+} from 'lucide-react';
+
+function MenuPrincipal({ alCerrarSesion, usuarioGlobal }) { 
   const [seccionActiva, setSeccionActiva] = useState('inicio');
 
   const modulosDashboard = [
-    { id: 'campeonatos', titulo: 'Campeonatos', desc: 'Explorar ligas y torneos activos' },
-    { id: 'pronosticos', titulo: 'Pronósticos', desc: 'Gestionar tus marcadores y apuestas' },
-    { id: 'ranking', titulo: 'Ranking Global', desc: 'Tabla de posiciones en tiempo real' },
-    { id: 'estadisticas', titulo: 'Mis Estadísticas', desc: 'Analizar tu rendimiento histórico' },
+    { id: 'campeonatos', titulo: 'Campeonatos', desc: 'Explorar ligas y torneos activos', icono: Trophy },
+    { id: 'pronosticos', titulo: 'Pronósticos', desc: 'Gestionar marcadores y predicciones', icono: Sparkles },
+    { id: 'ranking', titulo: 'Ranking Global', desc: 'Tabla de posiciones en tiempo real', icono: BarChart3 },
+    { id: 'estadisticas', titulo: 'Mis Estadísticas', desc: 'Analizar rendimiento histórico', icono: TrendingUp }
   ];
 
   return (
     <div className="contenedor-dashboard">
       
-      {/* NAVBAR SUPERIOR */}
+      {/* NAVBAR SUPERIOR CONTEMPORÁNEO */}
       <header className="navbar-superior">
-        
-        {/* LADO IZQUIERDO: SOLO EL LOGO */}
-        <div className="logo-contenedor">
+        <div className="logo-contenedor" onClick={() => setSeccionActiva('inicio')}>
           <img 
             src={logoGolStadys} 
             alt="GolStadys Premium" 
             className="logo-navbar"
-            onClick={() => setSeccionActiva('inicio')} 
-            style={{ cursor: 'pointer' }}
           />
+          <span className="logo-texto-premium">GOLSTADYS <small>PRO</small></span>
         </div>
 
-        {/* CENTRO: TÍTULO DINÁMICO */}
-        <div className="seccion-actual-navbar">
-          {seccionActiva !== 'inicio' && (
-            <h2 className="titulo-modulo-nav">
-              Módulo: <span className="resaltado-neon-nav">{modulosDashboard.find(m => m.id === seccionActiva)?.titulo}</span>
-            </h2>
-          )}
-        </div>
-
-        {/* LADO DERECHO: TODO EL GRUPO DE ACCIONES JUNTO */}
-        <div className="usuario-acciones">
+        {/* ESPACIO EXCLUSIVO AJUSTADO PARA EL PERFIL */}
+        <div className="perfil-navbar-derecho">
+          <div className="avatar-contenedor-pro">
+            <User className="icono-avatar-vectorial" size={18} />
+          </div>
+          <div className="info-usuario-logged">
+            <span className="nombre-user">{usuarioGlobal?.nombre || "Usuario Invitado"}</span>
+            <span className="rol-user-badge">{usuarioGlobal?.rol || "Especialista"}</span>
+          </div>
           
-          {/* 🏠 LA CASITA: Ahora empaquetada estrictamente a la derecha con los demás iconos */}
-          {seccionActiva !== 'inicio' && (
-            <button 
-              className="boton-home-nav"
-              onClick={() => setSeccionActiva('inicio')}
-              title="Volver al Menú Principal"
-            >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className="icono-casita"
-              >
-                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-            </button>
-          )}
+          <div className="divisor-vertical-navbar"></div>
 
-          {/* Botón icónico de salir */}
           <button 
-            className="boton-logout-icono"
-            onClick={() => {
-              if(window.confirm('¿Seguro que deseas salir del Estadio GolStadys?')) {
-                alert('Sesión finalizada de forma segura.');
-              }
-            }}
+            className="boton-cerrar-sesion-navbar" 
+            onClick={alCerrarSesion} 
             title="Cerrar Sesión"
           >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              className="icono-logout"
-            >
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
+            <LogOut size={18} />
           </button>
         </div>
       </header>
 
-      {/* CONTENEDOR DE CONTENIDO */}
-      <main className="espacio-contenido">
-        {seccionActiva === 'inicio' ? (
-          <>
-            <div className="bienvenida-header">
-              <h2>¡Bienvenido al Estadio, <span className="resaltado-neon">Crack</span>!</h2>
-            </div>
-
-            <div className="grilla-navegacion">
-              {modulosDashboard.map((modulo) => (
-                <div 
-                  key={modulo.id}
-                  className="tarjeta-menu-premium"
-                  onClick={() => setSeccionActiva(modulo.id)}
+      {/* ÁREA DE TRABAJO PRINCIPAL */}
+      <main className="area-principal-dashboard">
+        
+        {/* SIDEBAR ERGONÓMICO */}
+        <aside className="sidebar-navegacion">
+          <nav className="menu-enlaces-grupo">
+            <button 
+              className={`enlace-sidebar ${seccionActiva === 'inicio' ? 'activo' : ''}`}
+              onClick={() => setSeccionActiva('inicio')}
+            >
+              <Home size={18} className="icono-sidebar-pro" />
+              <span>Inicio</span>
+            </button>
+            
+            {modulosDashboard.map((mod) => {
+              const IconoModulo = mod.icono;
+              return (
+                <button
+                  key={mod.id}
+                  className={`enlace-sidebar ${seccionActiva === mod.id ? 'activo' : ''}`}
+                  onClick={() => setSeccionActiva(mod.id)}
                 >
-                  <div className="icono-vectorial">
-                    <div className="vector-dot"></div>
+                  <IconoModulo size={18} className="icono-sidebar-pro" />
+                  <span>{mod.titulo}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
+        {/* ÁREA DE CONTENIDO CON ANIMACIÓN DE ENTRADA */}
+        <section className="zona-render-dinamico">
+          {seccionActiva === 'inicio' ? (
+            <div className="vista-inicio-animada">
+              
+              {/* BANNER LIMPIO DE BIENVENIDA */}
+              <div className="bienvenida-banner">
+                <div className="bloque-titulado">
+                  <h1>Panel de Control, {usuarioGlobal?.nombre || 'Analista'}</h1>
+                  <p>Monitorea métricas en tiempo real, optimiza tus predicciones analíticas antes de cada partido y compite en el escalafón general.</p>
+                </div>
+              </div>
+
+              {/* GRID PREMIUM CON TRANSICIONES DINÁMICAS */}
+              <div className="grid-accesos-rapidos">
+                {modulosDashboard.map((modulo) => {
+                  const IconoTarjeta = modulo.icono;
+                  return (
+                    <div 
+                      className="tarjeta-acceso-rapido-premium" 
+                      key={modulo.id}
+                      onClick={() => setSeccionActiva(modulo.id)}
+                    >
+                      <div className="encabezado-tarjeta-acceso">
+                        <div className="contenedor-icono-tarjeta">
+                          <IconoTarjeta size={20} className="icono-interno-card" />
+                        </div>
+                        <ChevronRight className="flecha-indicador" size={16} />
+                      </div>
+                      <h3>{modulo.titulo}</h3>
+                      <p>{modulo.desc}</p>
+                      <div className="linea-brillo-efecto"></div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* FEED METADATOS DE SEGUIMIENTO */}
+              <div className="seccion-metadatos-vivo">
+                <div className="card-live-feed">
+                  <div className="icono-vectorial-wrapper-feed">
+                    <Calendar size={18} />
                   </div>
                   <div className="info-meta">
-                    <span className="titulo-meta">{modulo.titulo}</span>
-                    <span className="subtitulo-meta">{modulo.desc}</span>
+                    <span className="titulo-meta">Próxima Fecha</span>
+                    <span className="subtitulo-meta highlight-feed">Cierre en menos de 2 horas</span>
                   </div>
                 </div>
-              ))}
-            </div>
+                
+                <div className="card-live-feed">
+                  <div className="icono-vectorial-wrapper-feed">
+                    <Target size={18} />
+                  </div>
+                  <div className="info-meta">
+                    <span className="titulo-meta">Estado Analítico</span>
+                    <span className="subtitulo-meta">Clasificación General Activa</span>
+                  </div>
+                </div>
+              </div>
 
-            <div className="panel-inferior-resumen">
-              <div className="card-live-feed">
-                <div className="indicador-pulso"></div>
-                <div className="info-meta">
-                  <span className="titulo-meta" style={{ fontSize: '1rem' }}>Próxima Fecha</span>
-                  <span className="subtitulo-meta" style={{ color: '#00ff88' }}>¡Cierre en menos de 2 horas!</span>
-                </div>
-              </div>
-              
-              <div className="card-live-feed">
-                <div className="icono-vectorial" style={{ margin: 0, width: '30px', height: '30px' }}>🎯</div>
-                <div className="info-meta">
-                  <span className="titulo-meta" style={{ fontSize: '1rem' }}>Tu Posición</span>
-                  <span className="subtitulo-meta">Puesto #14 en el Torneo Global</span>
-                </div>
-              </div>
             </div>
-          </>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
+          ) : (
             <div className="contenedor-vista-modulo-activa">
               {seccionActiva === 'campeonatos' && <Campeonatos />}
-              {seccionActiva !== 'campeonatos' && (
-                <div className="vista-modulo-vacio">
-                  ⚙️ Entorno analítico en fase de desarrollo. Próxima vinculación de bases de datos.
+              {seccionActiva === 'ranking' && <Ranking />}
+              {seccionActiva === 'pronosticos' && <Pronosticos usuarioGlobal={usuarioGlobal} />}
+              {seccionActiva === 'estadisticas' && (
+                <div className="estadisticas-placeholder">
+                  <h2>Módulo en desarrollo analítico</h2>
                 </div>
               )}
             </div>
-          </div>
-        )}
+          )}
+        </section>
       </main>
-
     </div>
   );
 }

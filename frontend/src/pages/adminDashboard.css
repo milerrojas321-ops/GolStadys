@@ -1,248 +1,471 @@
-/* ==========================================================================
-   PANEL DE ADMINISTRACIÓN PREMIUM - GOLSTADYS (VAR & CONTROL)
-   ========================================================================== */
+/* src/pages/adminDashboard.css */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap');
 
-.contenedor-admin {
-  display: flex;
-  flex-direction: column;
-  width: 100vw;
-  height: 100vh;
-  background: radial-gradient(circle at 50% 0%, #0d192e 0%, #050811 100%);
-  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-  overflow: hidden;
+:root {
+  --fondo-espacial: #06090f;
+  --panel-glass: rgba(21, 28, 46, 0.8);
+  --borde-neon: rgba(0, 255, 136, 0.15);
+  --verde-neon: #00ff88;
+  --azul-deep: #10b981;
+  --error-neon: #ff4757;
+  --texto-vibrante: #e2e8f0;
+  --fuente-futura: 'Rajdhani', sans-serif;
+  --fuente-display: 'Orbitron', sans-serif;
 }
 
-/* NAVBAR DEL PANEL DE CONTROL */
-.navbar-admin {
+.contenedor-admin-dashboard {
+  min-height: 100vh;
+  background: radial-gradient(circle at top right, #0d1b1a, var(--fondo-espacial));
+  color: var(--texto-vibrante);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--fuente-futura);
+}
+
+/* NAVBAR MODERNA */
+.navbar-superior-admin {
+  height: 70px;
+  background: rgba(15, 20, 34, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid var(--borde-neon);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 40px;
-  background: rgba(10, 15, 28, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(0, 255, 136, 0.12);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  padding: 0 40px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   z-index: 100;
 }
 
-.badge-rol {
-  background: linear-gradient(135deg, #00ff88 0%, #00bfff 100%);
-  color: #050811;
-  font-size: 0.75rem;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 6px;
-  letter-spacing: 1px;
+.logo-texto-admin {
+  font-family: var(--fuente-display);
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  color: var(--verde-neon);
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.badge-admin-tag {
+  background: var(--error-neon);
+  color: white;
+  font-family: var(--fuente-futura);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  margin-left: 10px;
   text-transform: uppercase;
-  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
 }
 
-/* ÁREA DE CONTENIDO FLUIDA */
-.espacio-admin {
-  flex-grow: 1;
-  padding: 35px 40px;
-  overflow-y: auto;
+/* ÁREA DE TRABAJO */
+.area-principal-admin {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.sidebar-admin {
+  width: 260px;
+  background: rgba(10, 15, 28, 0.8);
+  border-right: 1px solid var(--borde-neon);
+  padding: 30px 15px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-/* CONTADORES EN TIEMPO REAL (KPIs) */
-.fila-kpis {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
-  animation: fadeInDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.kpi-card {
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 14px;
-  padding: 20px;
+.enlace-sidebar {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #94a3b8;
+  padding: 15px;
+  border-radius: 8px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  position: relative;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: var(--fuente-futura);
+  font-weight: 600;
+  font-size: 1rem;
 }
 
-.kpi-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.enlace-sidebar.activo {
+  background: rgba(0, 255, 136, 0.05);
+  border-color: var(--verde-neon);
+  color: var(--verde-neon);
+  box-shadow: inset 0 0 15px rgba(0, 255, 136, 0.1);
 }
 
-.kpi-titulo {
-  color: #64748b;
+.enlace-sidebar:hover:not(.activo) {
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+}
+
+/* CONTENIDO DINÁMICO */
+.zona-render-admin {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+/* GRID DE GESTIÓN DE PARTIDOS */
+.grid-gestion-partidos {
+  display: grid;
+  grid-template-columns: 350px 1fr; /* Formulario a la izquierda, Tabla a la derecha */
+  gap: 30px;
+  align-items: start;
+}
+
+/* TARJETAS GLASSMORFICAS */
+.formulario-admin-card {
+  background: var(--panel-glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--borde-neon);
+  padding: 30px;
+  border-radius: 20px;
+  position: sticky;
+  top: 0;
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.formulario-admin-card h3 {
+  font-family: var(--fuente-display);
+  font-size: 1rem;
+  margin-bottom: 25px;
+  color: var(--verde-neon);
+  border-left: 4px solid var(--verde-neon);
+  padding-left: 15px;
+}
+
+.campo-admin {
+  margin-bottom: 20px;
+}
+
+.campo-admin label {
+  display: block;
   font-size: 0.8rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
 }
 
-.kpi-valor {
-  color: #ffffff;
-  font-size: 1.8rem;
+.campo-admin input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 12px;
+  border-radius: 8px;
+  color: white;
+  transition: all 0.3s;
+}
+
+.campo-admin input:focus {
+  border-color: var(--verde-neon);
+  outline: none;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
+}
+
+.boton-admin-pro {
+  width: 100%;
+  background: linear-gradient(90deg, #00ff88, #00cc6a);
+  color: #06090f;
+  border: none;
+  padding: 15px;
+  border-radius: 10px;
   font-weight: 800;
+  font-family: var(--fuente-display);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.3s;
 }
 
-/* Pulso de actividad del sistema */
-.pulso-var {
-  width: 8px;
-  height: 8px;
-  background-color: #00ff88;
-  border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
-  animation: pulsoNeonAdmin 1.8s infinite;
+.boton-admin-pro:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
 }
 
-/* GRILLA MAESTRA DE HERRAMIENTAS ADM */
-.grilla-herramientas {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 25px;
-  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Tarjetas de herramientas estilo consola */
-.tarjeta-control-premium {
-  background: rgba(15, 23, 42, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.02);
+/* TABLA DE PARTIDOS PRO */
+.tabla-admin-contenedor {
+  background: var(--panel-glass);
+  border: 1px solid var(--borde-neon);
   border-radius: 20px;
   padding: 30px;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.tabla-admin {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+.tabla-admin th {
+  text-align: left;
+  padding: 15px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+}
+
+.tabla-admin tbody tr {
+  background: rgba(255, 255, 255, 0.02);
+  transition: all 0.3s;
+}
+
+.tabla-admin tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: scale(1.01);
+}
+
+.tabla-admin td {
+  padding: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.admin-banderita {
+  width: 32px;
+  height: 20px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.admin-tabla-equipos {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 240px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Resplandor trasero sutil al hacer hover */
-.tarjeta-control-premium::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(0, 255, 136, 0.03) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
-}
-
-.tarjeta-control-premium:hover {
-  transform: translateY(-6px) scale(1.01);
-  background: rgba(20, 32, 59, 0.5);
-  border-color: rgba(0, 255, 136, 0.25);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 255, 136, 0.03);
-}
-
-.tarjeta-control-premium:hover::after {
-  opacity: 1;
-}
-
-/* Indicadores de diseño internos */
-.cabecera-tarjeta-adm {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 25px;
-}
-
-.vector-linea-status {
-  width: 35px;
-  height: 4px;
-  background: #1e293b;
-  border-radius: 2px;
-  transition: all 0.3s ease;
-}
-
-.tarjeta-control-premium:hover .vector-linea-status {
-  background: #00ff88;
-  width: 50px;
-  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-}
-
-.cuerpo-tarjeta-adm h3 {
-  color: #ffffff;
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-  letter-spacing: -0.3px;
-}
-
-.cuerpo-tarjeta-adm p {
-  color: #64748b;
-  font-size: 0.88rem;
-  line-height: 1.5;
-}
-
-.footer-tarjeta-adm {
-  margin-top: 30px;
-  display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  font-weight: 600;
 }
 
-.badge-modulo {
+/* BADGES ESTADO */
+.badge-admin-estado {
+  padding: 4px 12px;
+  border-radius: 20px;
   font-size: 0.7rem;
   font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-admin-estado.programado {
+  background: rgba(0, 255, 136, 0.1);
+  color: var(--verde-neon);
+  border: 1px solid var(--verde-neon);
+}
+
+.badge-admin-estado.finalizado {
+  background: rgba(148, 163, 184, 0.1);
   color: #94a3b8;
-  background: rgba(255, 255, 255, 0.04);
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.02);
+  border: 1px solid #94a3b8;
 }
 
-.flecha-interactiva {
-  color: #334155;
-  font-size: 1.2rem;
-  transition: all 0.3s ease;
+/* ANIMACIONES */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.tarjeta-control-premium:hover .flecha-interactiva {
-  color: #00ff88;
-  transform: translateX(5px);
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-/* SECCIONES INTERNAS ACTIVAS (FORMULARIOS / VISTAS) */
-.contenedor-vista-modulo {
-  background: rgba(11, 19, 36, 0.5);
-  border: 1px solid rgba(0, 255, 136, 0.1);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 40px;
-  animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+/* SCROLLBAR CUSTOM */
+.zona-render-admin::-webkit-scrollbar {
+  width: 6px;
+}
+.zona-render-admin::-webkit-scrollbar-thumb {
+  background: var(--verde-neon);
+  border-radius: 10px;
 }
 
 /* ==========================================================================
-   ANIMACIONES KEYFRAMES
+   ESTILOS AGREGADOS: CONTROLES DE MARCADOR EN LINEA PARA LA TABLA
    ========================================================================== */
 
-@keyframes pulsoNeonAdmin {
-  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.6); }
-  70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); }
-  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+.celda-marcador-interactiva {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-15px); }
-  to { opacity: 1; transform: translateY(0); }
+.marcador-estatico-final {
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--verde-neon);
+  background: rgba(0, 255, 136, 0.08);
+  padding: 4px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 255, 136, 0.2);
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(25px); }
-  to { opacity: 1; transform: translateY(0); }
+.inputs-marcador-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.98); }
-  to { opacity: 1; transform: scale(1); }
+.input-marcador-tabla {
+  width: 42px;
+  height: 30px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  color: #fff;
+  text-align: center;
+  font-family: var(--fuente-display);
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.input-marcador-tabla:focus {
+  outline: none;
+  border-color: var(--verde-neon);
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.3);
+}
+
+/* Remueve las flechas por defecto de los inputs de tipo número */
+.input-marcador-tabla::-webkit-outer-spin-button,
+.input-marcador-tabla::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.separador-tabla-vs {
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.boton-guardar-marcador-fila {
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  color: var(--verde-neon);
+  padding: 6px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+  margin-left: 4px;
+}
+
+.boton-guardar-marcador-fila:hover {
+  background: var(--verde-neon);
+  color: #000;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+  transform: scale(1.05);
+}
+
+/* Estilos para el campo en fila */
+.campo-admin-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+/* Banner de feedback flotante */
+.banner-feedback-admin {
+  position: fixed;
+  top: 85px;
+  right: 25px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  z-index: 1000;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  animation: slideInAdmin 0.3s ease-out;
+}
+.banner-feedback-admin.exito {
+  background: rgba(0, 255, 136, 0.15);
+  border: 1px solid var(--verde-neon);
+  color: var(--verde-neon);
+}
+.banner-feedback-admin.error {
+  background: rgba(255, 71, 87, 0.15);
+  border: 1px solid var(--error-neon);
+  color: var(--error-neon);
+}
+
+/* Tabla - Marcadores integrados */
+.celda-marcador-interactiva {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.marcador-estatico-final {
+  font-family: var(--fuente-display);
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--verde-neon);
+  background: rgba(0, 255, 136, 0.08);
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 255, 136, 0.2);
+}
+.inputs-marcador-inline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 3px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.input-marcador-tabla {
+  width: 38px;
+  height: 28px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #fff;
+  text-align: center;
+  font-family: var(--fuente-display);
+  font-size: 0.85rem;
+}
+.input-marcador-tabla:focus {
+  outline: none;
+  border-color: var(--verde-neon);
+}
+.input-marcador-tabla::-webkit-outer-spin-button,
+.input-marcador-tabla::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.separador-tabla-vs {
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: bold;
+}
+.boton-guardar-marcador-fila {
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  color: var(--verde-neon);
+  padding: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.boton-guardar-marcador-fila:hover {
+  background: var(--verde-neon);
+  color: #000;
+  box-shadow: 0 0 8px var(--verde-neon);
+}
+
+@keyframes slideInAdmin {
+  from { transform: translateX(50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }

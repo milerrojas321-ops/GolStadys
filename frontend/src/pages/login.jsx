@@ -23,7 +23,7 @@ function Login({ alIniciarSesion }) {
     setError('');
 
     try {
-      const respuesta = await fetch('http://localhost:5000/api/auth/solicitar-codigo', {
+      const respuesta = await fetch('http://localhost:5000/api/auth/solicitar-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ correo_electronico: correo })
@@ -37,8 +37,7 @@ function Login({ alIniciarSesion }) {
 
       console.log(`Solicitando código para: ${correo}`);
       
-      // 🚨 CORRECCIÓN AQUÍ: No activamos el perfil todavía. 
-      // Solo guardamos la bandera y activamos que el código fue enviado para ir al Paso 2.
+      // Guardamos la bandera y activamos que el código fue enviado para ir al Paso 2.
       setRequierePerfil(datos.requiereRegistroCompleto); 
       setCodigoEnviado(true); 
       
@@ -49,7 +48,7 @@ function Login({ alIniciarSesion }) {
     }
   };
 
-  // PASO 2: Verificar el código OTP digitado por el usuario
+  // PASO 2: Verificar el código OTP digitado por el usuario (Antiguos / Nuevos)
   const manejarVerificarCodigo = async (e) => {
     e.preventDefault();
     if (!codigoOtp) return;
@@ -72,18 +71,32 @@ function Login({ alIniciarSesion }) {
 
       console.log(`Verificando código: ${codigoOtp}`);
       
+      // Guardamos el token JWT para peticiones seguras si tu backend lo usa
       if (datos.token) {
         localStorage.setItem('token_golstadys', datos.token);
       }
 
-      // 🚨 CORRECCIÓN AQUÍ: Evaluamos la bandera guardada después de que el OTP sea exitoso
       if (requierePerfil) {
         // Si el backend dijo en el Paso 1 que no tenía nombre, ocultamos el OTP y abrimos el formulario del perfil
         setCodigoEnviado(false); 
       } else {
-        // Si ya es un usuario antiguo con nombre completo, entra directo al estadio
+        // 🟢 CORRECCIÓN DE MAPEO EXACTO:
+        // Como tu backend devuelve 'id' y 'nombre_completo' directamente en 'datos' o dentro de 'datos.usuario':
+        const usuarioReal = datos.usuario || datos;
+
+        const sesionUsuario = {
+          id_usuario: usuarioReal.id, // Mapeamos el 'id' de la BD a 'id_usuario' que usa el Front
+          nombre: usuarioReal.nombre_completo, // Mapeamos 'nombre_completo'
+          rol: usuarioReal.rol || 'user'
+        };
+
+        // Guardamos de forma limpia el objeto estructurado
+        localStorage.setItem('usuario', JSON.stringify(sesionUsuario));
+        
+        // Entra directo al estadio
         alIniciarSesion();
       }
+      
     } catch (err) {
       setError(err.message);
     } finally {
@@ -113,6 +126,16 @@ function Login({ alIniciarSesion }) {
       }
 
       console.log(`Guardando perfil para: ${nombreCompleto}`);
+
+      // Construimos el objeto de sesión con la respuesta del registro exitoso
+      const sesionUsuarioNuevo = {
+        id_usuario: datos.id_usuario || datos.id || datos.usuario?.id_usuario,
+        nombre: nombreCompleto,
+        rol: datos.rol || 'user'
+      };
+
+      localStorage.setItem('usuario', JSON.stringify(sesionUsuarioNuevo));
+
       alIniciarSesion();
     } catch (err) {
       setError(err.message);
@@ -164,7 +187,7 @@ function Login({ alIniciarSesion }) {
           </form>
         )}
 
-        {/* 🚨 PASO 2: Pedir OTP (CORREGIDO: Se muestra siempre que se envíe el código, para cualquier rol) */}
+        {/* PASO 2: Pedir OTP */}
         {codigoEnviado && (
           <form onSubmit={manejarVerificarCodigo} className="formulario">
             <div className="alerta-envio">
@@ -201,7 +224,7 @@ function Login({ alIniciarSesion }) {
           </form>
         )}
 
-        {/* 🚨 PASO 3: Post-Registro (CORREGIDO: Solo se activa cuando el código ya se verificó con éxito y requierePerfil quedó activo en solitario) */}
+        {/* PASO 3: Post-Registro */}
         {!codigoEnviado && requierePerfil && (
           <form onSubmit={manejarGuardarPerfil} className="formulario">
             <div className="alerta-envio">

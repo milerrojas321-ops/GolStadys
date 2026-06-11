@@ -1,21 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './campeonatos.css'; 
 import CalendarioApuestas from './calendario_apuestas'; 
 
 function Campeonatos() {
   const [filtroActivo, setFiltroActivo] = useState('todos');
   const [torneoSeleccionado, setTorneoSeleccionado] = useState(null);
+  
+  // 1. Estados nuevos para controlar los datos de la base de datos y la carga
+  const [torneos, setTorneos] = useState([]);
+  const [cargando, setCargando] = useState(true);
 
-  const torneos = [
-    { id: 'mundial2026', nombre: 'Mundial 2026', categoria: 'internacional', estado: 'Disponible', partidosActivos: 24, premioPool: '500K Pts', popularidad: '🔥 ALTA', logo: '🏆' },
-    { id: 'champions26', nombre: 'UEFA Champions League', categoria: 'internacional', estado: 'Disponible', partidosActivos: 16, premioPool: '350K Pts', popularidad: '⭐ Destacado', logo: '⚽' },
-    { id: 'liga_col', nombre: 'Liga BetPlay DIMAYOR', categoria: 'locales', estado: 'Próximamente', partidosActivos: 0, premioPool: '200K Pts', popularidad: '🇨🇴 Local', logo: '🥇' },
-    { id: 'premier_league', nombre: 'Premier League', categoria: 'europeas', estado: 'Disponible', partidosActivos: 10, premioPool: '300K Pts', popularidad: '⚡ Top', logo: '🦁' }
-  ];
+  // 2. Efecto para traer de forma asíncrona los torneos desde el Backend
+  useEffect(() => {
+    const cargarTorneosDesdeBD = async () => {
+      try {
+        const respuesta = await fetch('http://localhost:5000/api/torneos');
+        const datos = await respuesta.json();
+        setTorneos(datos);
+        setCargando(false);
+      } catch (error) {
+        console.error('❌ Error al conectar con el backend:', error);
+        setCargando(false);
+      }
+    };
 
+    cargarTorneosDesdeBD();
+  }, []);
+
+  // 3. Sistema de filtros adaptado a los datos de la base de datos
   const torneosFiltrados = filtroActivo === 'todos' 
     ? torneos 
     : torneos.filter(t => t.categoria === filtroActivo);
+
+  // Si está cargando los datos, muestra un aviso limpio respetando tu diseño
+  if (cargando) {
+    return (
+      <div className="modulo-campeonatos-dinamico" style={{ color: '#fff', textAlign: 'center', padding: '40px' }}>
+        <p>Cargando campeonatos desde GolStadys...</p>
+      </div>
+    );
+  }
 
   // Si hay un torneo seleccionado, renderizamos de forma limpia la vista del calendario
   if (torneoSeleccionado) {
@@ -48,40 +72,42 @@ function Campeonatos() {
         ))}
       </div>
 
-      {/* GRILLA REDISEÑADA: TARJETAS MÁS PEQUEÑAS Y VISUALMENTE LIMPIAS */}
+      {/* GRILLA REDISEÑADA: TARJETAS CONECTADAS DIRECTAMENTE A MYSQL */}
       <div className="grilla-torneos-compacta">
         {torneosFiltrados.map((torneo) => (
-          <div key={torneo.id} className="tarjeta-torneo-mini">
+          <div key={torneo.id_torneo} className="tarjeta-torneo-mini">
             
-            {/* Encabezado reducido */}
+            {/* Encabezado dinámico mapeado con tu phpMyAdmin */}
             <div className="mini-torneo-header">
-              <span className="mini-logo">{torneo.logo}</span>
+              <span className="mini-logo">{torneo.logo || '🏆'}</span>
               <div className="mini-titulos">
                 <h3>{torneo.nombre}</h3>
-                <span className={`mini-badge-estado ${torneo.estado.toLowerCase()}`}>
+                <span className={`mini-badge-estado ${torneo.estado ? torneo.estado.toLowerCase() : 'disponible'}`}>
                   {torneo.estado}
                 </span>
               </div>
             </div>
 
-            {/* Estadísticas ordenadas en una sola línea */}
+            {/* Estadísticas vinculadas a los nombres reales de tus columnas */}
             <div className="mini-torneo-stats">
               <div className="mini-stat">
-                <span className="mini-label">Partidos</span>
-                <span className="mini-valor neon">{torneo.partidosActivos}</span>
+                <span className="mini-label">Popularidad</span>
+                <span className="mini-valor neon" style={{ fontSize: '0.85rem' }}>
+                  {torneo.popularidad || 'MEDIA'}
+                </span>
               </div>
               <div className="mini-stat">
                 <span className="mini-label">Pool</span>
-                <span className="mini-valor platino">{torneo.premioPool}</span>
+                <span className="mini-valor platino">{torneo.premio_pool}</span>
               </div>
             </div>
 
-            {/* Botón de acción integrado perfectamente */}
+            {/* Botón de acción interactivo */}
             <div className="mini-torneo-footer">
               {torneo.estado === 'Disponible' ? (
                 <button 
                   className="boton-mini-fixture" 
-                  onClick={() => setTorneoSeleccionado(torneo.id)}
+                  onClick={() => setTorneoSeleccionado(torneo.id_torneo)}
                 >
                   Ver Calendario
                 </button>

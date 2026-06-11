@@ -1,4 +1,5 @@
 import pool from '../config/conexion_db.js';
+import db from '../config/conexion_db.js';
 
 const Usuario = {
     // Buscar un usuario por su correo electrónico
@@ -47,7 +48,16 @@ const Usuario = {
             [nombre, correo]
         );
         return result.affectedRows > 0;
-    }
+    },
+
+obtenerRankingGlobal: async () => {
+    // Trae a los usuarios ordenados por puntos de mayor a menor. 
+    // Si empatan en puntos, los ordena por nombre alfabéticamente.
+    const [rows] = await db.query(
+        "SELECT id_usuario, nombre_completo, puntaje_total FROM usuarios ORDER BY puntaje_total DESC, nombre_completo ASC"
+    );
+    return rows;
+    }   
 };
 
 export default Usuario;
