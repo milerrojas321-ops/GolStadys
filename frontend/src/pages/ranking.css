@@ -4,9 +4,10 @@
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
-  padding: 30px 20px;
+  padding: 10px 20px;
   color: #ffffff;
   font-family: 'Poppins', sans-serif;
+  background: transparent; /* 🟢 Forzamos que sea transparente para ver el fondo del dashboard */
 }
 
 .ranking-encabezado {
@@ -70,13 +71,13 @@
 }
 
 .tarjeta-podio.plata {
-  height: 260px;
+  height: 280px;
   border-color: rgba(226, 232, 240, 0.3);
   background: linear-gradient(135deg, rgba(226, 232, 240, 0.05), rgba(30, 41, 59, 0.6));
 }
 
 .tarjeta-podio.bronce {
-  height: 230px;
+  height: 260px;
   border-color: rgba(249, 115, 22, 0.3);
   background: linear-gradient(135deg, rgba(249, 115, 22, 0.05), rgba(30, 41, 59, 0.6));
 }

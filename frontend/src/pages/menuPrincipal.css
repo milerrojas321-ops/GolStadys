@@ -212,6 +212,10 @@
   flex: 1;
   padding: 35px;
   overflow-y: auto;
+  background: transparent; /* 🟢 Clave: Evita que capas internas metan fondos blancos */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .vista-inicio-animada {
