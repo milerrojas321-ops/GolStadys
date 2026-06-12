@@ -2,8 +2,8 @@
 import db from '../config/conexion_db.js';
 
 const Partido = {
-  obtenerPorTorneo: async (idTorneo) => {
-    const querySQL = `
+  obtenerPorTorneo: async (torneoId) => {
+    const query = `
       SELECT 
         p.id_partido,
         p.id_torneo,
@@ -19,9 +19,12 @@ const Partido = {
       INNER JOIN selecciones sl ON p.id_local = sl.id_seleccion
       INNER JOIN selecciones sv ON p.id_visitante = sv.id_seleccion
       WHERE p.id_torneo = ?
+      ORDER BY p.fecha_hora ASC
     `;
-    const [filas] = await db.query(querySQL, [idTorneo]);
-    return filas;
+
+    // Ejecutamos la consulta y retornamos las filas directamente
+    const [rows] = await db.query(query, [torneoId]);
+    return rows;
   },
 
   obtenerTodos: async () => {

@@ -13,6 +13,28 @@ export const obtenerPartidosPorTorneo = async (req, res) => {
   }
 };
 
+export const getPartidosPorTorneo = async (req, res) => {
+  try {
+    const { torneoId } = req.params;
+
+    // Validación básica del parámetro por seguridad
+    if (!torneoId) {
+      return res.status(400).json({ mensaje: "El ID del torneo es requerido." });
+    }
+
+    // Llamamos al modelo para interactuar con MySQL
+    const fixture = await Partido.obtenerPorTorneo(torneoId);
+
+    // Si el torneo no tiene partidos, devolvemos un arreglo vacío de forma segura
+    res.json(fixture);
+  } catch (error) {
+    console.error("❌ Error en getPartidosPorTorneo Control:", error);
+    res.status(500).json({ 
+      mensaje: "Error interno del servidor al procesar el fixture de GolStadys." 
+    });
+  }
+};
+
 export const obtenerTodosLosPartidos = async (req, res) => {
   try {
     const partidos = await Partido.obtenerTodos();

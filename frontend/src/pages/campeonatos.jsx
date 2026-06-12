@@ -47,7 +47,7 @@ function Campeonatos() {
       <div className="submodulo-calendario-wrapper">
         <button 
           className="boton-regresar-modulo" 
-          onClick={() => setTorneoSeleccionado(null)}
+          onClick={() => setTorneoSeleccionado(torneo.id)}
         >
           ← Volver a Seleccionar Torneo
         </button>
@@ -82,7 +82,7 @@ function Campeonatos() {
               <span className="mini-logo">{torneo.logo || '🏆'}</span>
               <div className="mini-titulos">
                 <h3>{torneo.nombre}</h3>
-                <span className={`mini-badge-estado ${torneo.estado ? torneo.estado.toLowerCase() : 'disponible'}`}>
+                <span className={`mini-badge-estado ${torneo.estado ? torneo.estado.toLowerCase() === 'disponible' : ''}`}>
                   {torneo.estado}
                 </span>
               </div>
@@ -107,7 +107,7 @@ function Campeonatos() {
               {torneo.estado === 'Disponible' ? (
                 <button 
                   className="boton-mini-fixture" 
-                  onClick={() => setTorneoSeleccionado(torneo.id_torneo)}
+                  onClick={() => setTorneoSeleccionado(torneo.id)}
                 >
                   Ver Calendario
                 </button>
