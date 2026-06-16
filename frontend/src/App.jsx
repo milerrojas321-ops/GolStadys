@@ -1,6 +1,6 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
-import Login from './pages/Login'; 
+import IniciarSesion from "./pages/login";
 import MenuPrincipal from './pages/menuPrincipal';
 import AdminDashboard from './pages/adminDashboard';
 
@@ -53,7 +53,7 @@ function App() {
   return (
     <>
       {pantallaActual === 'login' && (
-        <Login alIniciarSesion={verificarYDireccionarSesion} />
+        <IniciarSesion alIniciarSesion={verificarYDireccionarSesion} />
       )}
       
       {pantallaActual === 'menu' && (
