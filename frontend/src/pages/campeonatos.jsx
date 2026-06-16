@@ -14,7 +14,7 @@ function Campeonatos() {
   useEffect(() => {
     const cargarTorneosDesdeBD = async () => {
       try {
-        const respuesta = await fetch('http://localhost:5000/api/torneos');
+        const respuesta = await fetch('https://golstadys-production.up.railway.app/api/torneos');
         const datos = await respuesta.json();
         setTorneos(datos);
         setCargando(false);

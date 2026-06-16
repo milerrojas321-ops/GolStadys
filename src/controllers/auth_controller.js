@@ -1,55 +1,82 @@
+import { enviarCodigoVerificacion } from '../services/emailService.js'; // Añadido el .js al final
 import Usuario from '../models/usuario.js';
 
-// 1. Solicitar Código
+// 1. Solicitar Código (Exportado correctamente)
 export const solicitarCodigo = async (req, res) => {
-    const { correo_electronico } = req.body;
-    if (!correo_electronico) return res.status(400).json({ error: 'El correo electrónico es requerido.' });
+    const { correo } = req.body; 
+
+    if (!correo) {
+        return res.status(400).json({ ok: false, msg: 'El correo es obligatorio' });
+    }
 
     try {
-        let usuario = await Usuario.findByEmail(correo_electronico);
-        let esNuevo = false;
+        // Verificar si el usuario ya existe en GolStadys
+        let usuario = await Usuario.findByEmail(correo);
 
+        // Si no existe, lo registramos automáticamente (rol por defecto: jugador)
         if (!usuario) {
-            const nuevoId = await Usuario.create(correo_electronico);
-            usuario = { id_usuario: nuevoId, correo_electronico, nombre_completo: null };
-            esNuevo = true;
+            await Usuario.create(correo);
         }
 
-        const codigoOtp = Math.floor(100000 + Math.random() * 900000).toString();
-        const ahora = new Date();
-        const otpExpiracion = new Date(ahora.getTime() + 5 * 60 * 1000);
+        // Generar un código aleatorio de 6 dígitos
+        const codigoGenerado = Math.floor(100000 + Math.random() * 900000);
 
-        await Usuario.updateOTP(usuario.id_usuario, codigoOtp, otpExpiracion);
-        console.log(`\n📩 [CORREO ENVIADO A: ${correo_electronico}] | CÓDIGO OTP: ${codigoOtp}\n`);
+        // MODELO: Guardar el código en tu tabla de usuarios con su expiración
+        await Usuario.guardarCodigoTemporal(correo, codigoGenerado);
 
-        return res.status(200).json({
-            message: 'Código OTP generado con éxito.',
-            requiereRegistroCompleto: esNuevo || usuario.nombre_completo === null
+        // SERVICIO: Enviar el correo real usando Nodemailer y Brevo
+        const correoEnviado = await enviarCodigoVerificacion(correo, codigoGenerado);
+
+        if (!correoEnviado) {
+            return res.status(500).json({ ok: false, msg: 'Error al enviar el correo con el código' });
+        }
+
+        return res.status(200).json({ 
+            ok: true, 
+            msg: 'Código de verificación enviado con éxito.' 
         });
+
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Error interno del servidor.' });
+        console.error('Error en solicitarCodigo Controlador:', error);
+        return res.status(500).json({ ok: false, msg: 'Error interno en el servidor' });
     }
 };
 
 // 2. Verificar Código
 export const verificarCodigo = async (req, res) => {
-    const { correo_electronico, codigo_otp } = req.body;
-    if (!correo_electronico || !codigo_otp) return res.status(400).json({ error: 'Todos los campos son requeridos.' });
+    // Sincronizado con el body que envía el front (correo_electronico y codigo_otp)
+    const { correo_electronico, codigo_otp } = req.body; 
+    
+    if (!correo_electronico || !codigo_otp) {
+        return res.status(400).json({ error: 'Todos los campos son requeridos.' });
+    }
 
     try {
+        // Verificar OTP válido en la base de datos
         const usuario = await Usuario.verifyOTP(correo_electronico, codigo_otp);
-        if (!usuario) return res.status(400).json({ error: 'El código es incorrecto o ya expiró.' });
+        if (!usuario) {
+            return res.status(400).json({ error: 'El código es incorrecto o ya expiró.' });
+        }
 
-        // Limpiar OTP usado
+        // Limpiar el OTP ya usado para que no se pueda reutilizar
         await Usuario.updateOTP(usuario.id_usuario, null, null);
 
+        // EVALUACIÓN CLAVE: ¿Tiene el nombre vacío en la base de datos?
+        const requiereRegistroCompleto = !usuario.nombre_completo;
+
+        // Responder incluyendo los datos del usuario y la bandera de perfil
         return res.status(200).json({
             message: 'Código verificado con éxito.',
-            token: `token_sesion_${usuario.id_usuario}_${usuario.rol}` // Aquí mapeas el rol de forma dinámica
+            token: `token_sesion_${usuario.id_usuario}_${usuario.rol}`,
+            requiereRegistroCompleto: requiereRegistroCompleto, // <- ¡Esto le avisa a React!
+            usuario: {
+                id: usuario.id_usuario,
+                nombre_completo: usuario.nombre_completo,
+                rol: usuario.rol
+            }
         });
     } catch (error) {
-        console.error(error);
+        console.error('Error en verificarCodigo:', error);
         return res.status(500).json({ error: 'Error interno del servidor.' });
     }
 };
@@ -70,6 +97,7 @@ export const completarPerfil = async (req, res) => {
     }
 };
 
+// 4. Obtener Ranking
 export const obtenerRanking = async (req, res) => {
     try {
         const ranking = await Usuario.obtenerRankingGlobal();

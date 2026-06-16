@@ -3,7 +3,8 @@ import { solicitarCodigo, verificarCodigo, completarPerfil } from '../controller
 
 const router = Router();
 
-router.post('/solicitar-otp', solicitarCodigo);
+// Corregido: Llamamos directamente a la función importada sin el prefijo "authController."
+router.post('/login/enviar-codigo', solicitarCodigo);
 router.post('/verificar-codigo', verificarCodigo);
 router.post('/completar-perfil', completarPerfil);
 

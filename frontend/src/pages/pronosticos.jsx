@@ -19,7 +19,7 @@ function Pronosticos({ usuarioGlobal }) {
 
     setCargando(true); 
 
-    fetch(`http://localhost:5000/api/apuestas/usuario/${id_usuario}`)
+    fetch(`https://golstadys-production.up.railway.app/api/apuestas/usuario/${id_usuario}`)
       .then((res) => res.json())
       .then((data) => {
         console.log(`➡️ Datos de apuestas recibidos para el id_usuario (${id_usuario}):`, data);
