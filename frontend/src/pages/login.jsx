@@ -24,7 +24,7 @@ function Login({ alIniciarSesion }) {
 
   try {
     // CORRECCIÓN 1: Apuntar a la ruta real que definiste en tus rutas
-    const respuesta = await fetch('http://localhost:5000/api/auth/login/enviar-codigo', {
+    const respuesta = await fetch('https://golstadys-production.up.railway.app/api/auth/login/enviar-codigo', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       // CORRECCIÓN 2: Enviar 'correo' para que coincida con el controlador del Backend
@@ -59,7 +59,7 @@ function Login({ alIniciarSesion }) {
     setError('');
 
     try {
-      const respuesta = await fetch('http://localhost:5000/api/auth/verificar-codigo', {
+      const respuesta = await fetch('https://golstadys-production.up.railway.app/api/auth/verificar-codigo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ correo_electronico: correo, codigo_otp: codigoOtp })
@@ -110,7 +110,7 @@ function Login({ alIniciarSesion }) {
     setError('');
 
     try {
-      const respuesta = await fetch('http://localhost:5000/api/auth/completar-perfil', {
+      const respuesta = await fetch('https://golstadys-production.up.railway.app/api/auth/completar-perfil', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ correo_electronico: correo, nombre_completo: nombreCompleto })

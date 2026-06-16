@@ -41,7 +41,7 @@ function AdminDashboard({ alCerrarSesion, usuarioGlobal }) {
   };
 
   const fetchTorneos = () => {
-    fetch('http://localhost:5000/api/torneos')
+    fetch('https://golstadys-production.up.railway.app/api/torneos')
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setTorneos(data);
@@ -51,7 +51,7 @@ function AdminDashboard({ alCerrarSesion, usuarioGlobal }) {
 
   const fetchPartidos = () => {
     setCargando(true);
-    fetch('http://localhost:5000/api/partidos')
+    fetch('https://golstadys-production.up.railway.app/api/partidos')
       .then((res) => {
         if (!res.ok) throw new Error('Error en respuesta de red');
         return res.json();
@@ -85,7 +85,7 @@ function AdminDashboard({ alCerrarSesion, usuarioGlobal }) {
       return;
     }
 
-    fetch('http://localhost:5000/api/partidos', {
+    fetch('https://golstadys-production.up.railway.app/api/partidos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(nuevoPartido)
@@ -112,7 +112,7 @@ function AdminDashboard({ alCerrarSesion, usuarioGlobal }) {
       return;
     }
 
-    fetch(`http://localhost:5000/api/partidos/${idPartido}/resultado`, {
+    fetch(`https://golstadys-production.up.railway.app/api/partidos/${idPartido}/resultado`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
