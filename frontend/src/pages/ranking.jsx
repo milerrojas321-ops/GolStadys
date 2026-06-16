@@ -8,7 +8,7 @@ function Ranking() {
 
   useEffect(() => {
     // Llamada al endpoint de GolStadys
-    fetch('http://localhost:5000/api/ranking')
+    fetch('https://golstadys-production.up.railway.app/api/ranking')
       .then((res) => res.json())
       .then((data) => {
         setUsuarios(data);

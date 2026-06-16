@@ -19,7 +19,7 @@ function CalendarioApuestas({ torneoId }) {
         setCargando(true);
 
         // 1. Traer los partidos del torneo normalmente
-        const respuestaPartidos = await fetch(`http://localhost:5000/api/partidos/${torneoId}`);
+        const respuestaPartidos = await fetch(`https://golstadys-production.up.railway.app/api/partidos/${torneoId}`);
         const datosPartidos = await respuestaPartidos.json();
 
         // 2. Extraer el ID del usuario actual desde su token_golstadys
@@ -37,7 +37,7 @@ function CalendarioApuestas({ torneoId }) {
         let apuestasUsuario = [];
         if (idUsuarioReal && !isNaN(idUsuarioReal)) {
           try {
-            const respuestaApuestas = await fetch(`http://localhost:5000/api/apuestas/usuario/${idUsuarioReal}`);
+            const respuestaApuestas = await fetch(`https://golstadys-production.up.railway.app/api/apuestas/usuario/${idUsuarioReal}`);
             if (respuestaApuestas.ok) {
               apuestasUsuario = await respuestaApuestas.json();
             }
@@ -157,7 +157,7 @@ function CalendarioApuestas({ torneoId }) {
     };
 
     try {
-      const respuesta = await fetch('http://localhost:5000/api/apuestas', {
+      const respuesta = await fetch('https://golstadys-production.up.railway.app/api/apuestas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
