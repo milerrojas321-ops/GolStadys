@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import logoGolStadys from '../assets/logo.png';
-import './Login.css'; // Conexión directa con tus estilos CSS en limpio
+import './login.css'; // Conexión directa con tus estilos CSS en limpio
 
 function Login({ alIniciarSesion }) {
   // 1. LÓGICA DE JAVASCRIPT (Estados y Funciones)
