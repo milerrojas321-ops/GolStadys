@@ -50,14 +50,25 @@ const Usuario = {
         return result.affectedRows > 0;
     },
 
-obtenerRankingGlobal: async () => {
-    // Trae a los usuarios ordenados por puntos de mayor a menor. 
-    // Si empatan en puntos, los ordena por nombre alfabéticamente.
-    const [rows] = await db.query(
-        "SELECT id_usuario, nombre_completo, puntaje_total FROM usuarios ORDER BY puntaje_total DESC, nombre_completo ASC"
-    );
-    return rows;
-    }   
+    obtenerRankingGlobal: async () => {
+        // Trae a los usuarios ordenados por puntos de mayor a menor. 
+        // Si empatan en puntos, los ordena por nombre alfabéticamente.
+        const [rows] = await db.query(
+            "SELECT id_usuario, nombre_completo, puntaje_total FROM usuarios ORDER BY puntaje_total DESC, nombre_completo ASC"
+        );
+        return rows;
+    },
+
+    guardarCodigoTemporal: async (correo, codigo) => {
+        // Creamos una fecha de expiración sumándole 15 minutos al tiempo actual
+        const [result] = await pool.query(
+            `UPDATE usuarios 
+             SET codigo_otp = ?, otp_expiracion = DATE_ADD(NOW(), INTERVAL 15 MINUTE) 
+             WHERE correo_electronico = ?`,
+            [codigo, correo]
+        );
+        return result.affectedRows > 0;
+    }
 };
 
 export default Usuario;

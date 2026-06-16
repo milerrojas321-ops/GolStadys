@@ -16,37 +16,39 @@ function Login({ alIniciarSesion }) {
 
   // PASO 1: Solicitar código OTP al Backend
   const manejarEnvioCorreo = async (e) => {
-    e.preventDefault();
-    if (!correo) return;
+  e.preventDefault();
+  if (!correo) return;
 
-    setCargando(true);
-    setError('');
+  setCargando(true);
+  setError('');
 
-    try {
-      const respuesta = await fetch('http://localhost:5000/api/auth/solicitar-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ correo_electronico: correo })
-      });
+  try {
+    // CORRECCIÓN 1: Apuntar a la ruta real que definiste en tus rutas
+    const respuesta = await fetch('http://localhost:5000/api/auth/login/enviar-codigo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      // CORRECCIÓN 2: Enviar 'correo' para que coincida con el controlador del Backend
+      body: JSON.stringify({ correo: correo }) 
+    });
 
-      const datos = await respuesta.json();
+    const datos = await respuesta.json();
 
-      if (!respuesta.ok) {
-        throw new Error(datos.error || 'Error al solicitar el código');
-      }
-
-      console.log(`Solicitando código para: ${correo}`);
-      
-      // Guardamos la bandera y activamos que el código fue enviado para ir al Paso 2.
-      setRequierePerfil(datos.requiereRegistroCompleto); 
-      setCodigoEnviado(true); 
-      
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setCargando(false);
+    if (!respuesta.ok) {
+      throw new Error(datos.msg || datos.error || 'Error al solicitar el código');
     }
-  };
+
+    console.log(`Solicitando código para: ${correo}`);
+    
+    // Si tu backend determina si requiere perfil, lo manejas aquí
+    setRequierePerfil(datos.requiereRegistroCompleto || false); 
+    setCodigoEnviado(true); 
+    
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setCargando(false);
+  }
+};
 
   // PASO 2: Verificar el código OTP digitado por el usuario (Antiguos / Nuevos)
   const manejarVerificarCodigo = async (e) => {
@@ -76,24 +78,19 @@ function Login({ alIniciarSesion }) {
         localStorage.setItem('token_golstadys', datos.token);
       }
 
-      if (requierePerfil) {
-        // Si el backend dijo en el Paso 1 que no tenía nombre, ocultamos el OTP y abrimos el formulario del perfil
-        setCodigoEnviado(false); 
+      if (datos.requiereRegistroCompleto) {
+        setRequierePerfil(true); 
+        setCodigoEnviado(false); // Oculta el formulario del código OTP
       } else {
-        // 🟢 CORRECCIÓN DE MAPEO EXACTO:
-        // Como tu backend devuelve 'id' y 'nombre_completo' directamente en 'datos' o dentro de 'datos.usuario':
+        // Si ya tiene nombre, entra directo al estadio
         const usuarioReal = datos.usuario || datos;
-
         const sesionUsuario = {
-          id_usuario: usuarioReal.id, // Mapeamos el 'id' de la BD a 'id_usuario' que usa el Front
-          nombre: usuarioReal.nombre_completo, // Mapeamos 'nombre_completo'
-          rol: usuarioReal.rol || 'user'
+          id_usuario: usuarioReal.id,
+          nombre: usuarioReal.nombre_completo,
+          rol: usuarioReal.rol || 'jugador'
         };
 
-        // Guardamos de forma limpia el objeto estructurado
         localStorage.setItem('usuario', JSON.stringify(sesionUsuario));
-        
-        // Entra directo al estadio
         alIniciarSesion();
       }
       
