@@ -2,7 +2,7 @@ import https from 'https';
 
 /**
  * Función para enviar el código de verificación usando el módulo nativo HTTPS de Node.js
- * Diseñado para evitar fallos de entorno en producción (Railway)
+ * Corregido el endpoint oficial a v3 para evitar el error 404 de Brevo
  */
 export const enviarCodigoVerificacion = async (correoUsuario, codigo) => {
     return new Promise((resolve, reject) => {
@@ -27,11 +27,11 @@ export const enviarCodigoVerificacion = async (correoUsuario, codigo) => {
 
         const opciones = {
             hostname: 'api.brevo.com',
-            path: '/v1/smtp/email',
+            path: '/v3/smtp/email', // 👈 ¡Cambiado de /v1/ a /v3/ para solucionar el 404!
             method: 'POST',
             headers: {
                 'accept': 'application/json',
-                'api-key': process.env.BREVO_API_KEY, // 👈 Lee tu variable de Railway
+                'api-key': process.env.BREVO_API_KEY, 
                 'content-type': 'application/json',
                 'Content-Length': Buffer.byteLength(data)
             }
@@ -46,7 +46,7 @@ export const enviarCodigoVerificacion = async (correoUsuario, codigo) => {
 
             res.on('end', () => {
                 if (res.statusCode >= 200 && res.statusCode < 300) {
-                    console.log('📨 ¡Correo enviado con éxito por la API de Brevo!');
+                    console.log('📨 ¡Correo enviado con éxito por la API de Brevo v3!');
                     resolve(true);
                 } else {
                     console.error(`❌ Brevo respondió con código ${res.statusCode}:`, cuerpoRespuesta);
@@ -60,7 +60,6 @@ export const enviarCodigoVerificacion = async (correoUsuario, codigo) => {
             resolve(false);
         });
 
-        // Escribir los datos en el cuerpo de la petición y finalizarla
         req.write(data);
         req.end();
     });
