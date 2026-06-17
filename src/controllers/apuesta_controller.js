@@ -43,12 +43,12 @@ export const registrarApuesta = async (req, res) => {
     const diferenciaHoras = (momentoPartido - momentoActual) / (1000 * 60 * 60);
 
     //  REGLA DE NEGOCIO: Bloqueo a menos de 2 horas del partido
-    if (diferenciaHoras < 1) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'Pronóstico bloqueado. No puedes fijar o editar marcadores a menos de 2 horas del partido.'
-      });
-    }
+    // if (diferenciaHoras < 1) {
+    //   return res.status(400).json({
+    //     ok: false,
+    //     mensaje: 'Pronóstico bloqueado. No puedes fijar o editar marcadores a menos de 2 horas del partido.'
+    //   });
+    // }
 
     // 3. Guardar o Modificar a través del Modelo si pasa el filtro de tiempo
     await Apuesta.upsert({
