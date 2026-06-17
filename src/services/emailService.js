@@ -3,11 +3,11 @@ import nodemailer from 'nodemailer';
 // 1. Configurar el transportador con los datos de Brevo que guardamos en el .env
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: false, // false para puerto 587 (usa TLS)
+    port: parseInt(process.env.SMTP_PORT), 
+    secure: true, 
     auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
     }
 });
 
