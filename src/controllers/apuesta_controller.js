@@ -1,5 +1,4 @@
 import Apuesta from '../models/apuesta.js';
-import { procesarPuntosPartido } from './apuesta_controller.js';
 
 export const registrarApuesta = async (req, res) => {
   const { 
@@ -43,11 +42,11 @@ export const registrarApuesta = async (req, res) => {
     // Calcular la diferencia exacta expresada en horas reales
     const diferenciaHoras = (momentoPartido - momentoActual) / (1000 * 60 * 60);
 
-    //  REGLA DE NEGOCIO: Bloqueo a menos de 2 horas del partido
-    if (diferenciaHoras < 1) {
+    //  REGLA DE NEGOCIO: Bloqueo a menos de 5 horas del partido
+    if (diferenciaHoras < 5) {
       return res.status(400).json({
         ok: false,
-        mensaje: 'Pronóstico bloqueado. No puedes fijar o editar marcadores a menos de 2 horas del partido.'
+        mensaje: 'Pronóstico bloqueado. No puedes fijar o editar marcadores a menos de 5 horas del partido.'
       });
     }
 
@@ -79,12 +78,12 @@ export const obtenerApuestasUsuario = async (req, res) => {
 
   try {
     const filas = await Apuesta.findByUsuario(id_usuario);
-    
+
     // Si lo que viene no es un arreglo válido, forzamos un envío seguro
     if (!Array.isArray(filas)) {
       return res.status(200).json([]);
     }
-    
+
     return res.status(200).json(filas);
   } catch (error) {
     console.error('Error al obtener las apuestas del usuario:', error);
@@ -214,4 +213,4 @@ export const procesarPuntosPartido = async (req, res) => {
     console.error('Error en el cerebro de puntuación:', error);
     return res.status(500).json({ ok: false, mensaje: 'Error interno al liquidar los puntos del partido.' });
   }
-};
+}
