@@ -105,34 +105,54 @@ function AdminDashboard({ alCerrarSesion, usuarioGlobal }) {
       });
   };
 
-  const manejarGuardarResultadoDirecto = (idPartido) => {
-    const puntaje = marcadoresEnTabla[idPartido];
-    if (!puntaje || puntaje.goles_local === '' || puntaje.goles_visitante === '') {
-      mostrarFeedback('Digita los goles de ambos equipos', 'error');
-      return;
-    }
+  const manejarGuardarResultadoDirecto = async (idPartido) => {
+  const marcador = marcadoresEnTabla[idPartido];
+  if (!marcador || marcador.goles_local === '' || marcador.goles_visitante === '') {
+    mostrarFeedback('Por favor, ingresa ambos marcadores', 'error');
+    return;
+  }
 
-    fetch(`https://golstadys-production.up.railway.app/api/partidos/${idPartido}/resultado`, {
+  try {
+    mostrarFeedback('Guardando marcador oficial...', 'info');
+
+    // ✅ CONEXIÓN CORREGIDA: Método POST y ruta con '/resultado' al final
+    const respuesta = await fetch(`https://golstadys-production.up.railway.app/api/partidos/${idPartido}/resultado`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
-        goles_local: parseInt(puntaje.goles_local, 10),
-        goles_visitante: parseInt(puntaje.goles_visitante, 10)
+        goles_local: parseInt(marcador.goles_local, 10),
+        goles_visitante: parseInt(marcador.goles_visitante, 10)
       })
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('Error al cerrar partido');
-        return res.json();
-      })
-      .then(() => {
-        mostrarFeedback(`¡Partido #${idPartido} finalizado con éxito!`, 'exito');
-        fetchPartidos(); 
-      })
-      .catch((err) => {
-        console.error(err);
-        mostrarFeedback('Error en el cierre de marcador oficial', 'error');
-      });
-  };
+    });
+
+    const datos = await respuesta.json();
+
+    if (respuesta.ok) {
+      mostrarFeedback('¡Marcador guardado y puntos calculados con éxito!', 'exito');
+      
+      // Actualizar el estado visual solo si el servidor guardó los datos de verdad
+      setPartidos(partidosAnteriores =>
+        partidosAnteriores.map(p =>
+          p.id_partido === idPartido
+            ? { 
+                ...p, 
+                goles_local_real: parseInt(marcador.goles_local, 10), 
+                goles_visitante_real: parseInt(marcador.goles_visitante, 10), 
+                estado_partido: 'finalizado' 
+              }
+            : p
+        )
+      );
+    } else {
+      mostrarFeedback(datos.mensaje || 'Error al guardar en el servidor', 'error');
+    }
+  } catch (error) {
+    console.error('❌ Error al conectar con el backend:', error);
+    mostrarFeedback('Error de comunicación con el servidor', 'error');
+  }
+};
 
   const manejarCambioInputMarcador = (idPartido, campo, valor) => {
     setMarcadoresEnTabla({
