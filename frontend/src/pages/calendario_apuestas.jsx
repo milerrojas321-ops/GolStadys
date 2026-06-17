@@ -246,7 +246,7 @@ function CalendarioApuestas({ torneoId }) {
                         src={partido.bandera_local || '/src/assets/banderas/default.png'} 
                         alt={partido.nombre_local} 
                         className="imagen-bandera-redonda" 
-                        onError={(e) => { e.target.src = '⚽'; }} 
+                        onError={(e) => { e.target.src = '/src/assets/banderas/default.png'; }}
                       />
                     </div>
                   </div>
@@ -265,7 +265,8 @@ function CalendarioApuestas({ torneoId }) {
                         src={partido.bandera_visitante || '/src/assets/banderas/default.png'} 
                         alt={partido.nombre_visitante} 
                         className="imagen-bandera-redonda" 
-                        onError={(e) => { e.target.src = '⚽'; }} 
+                        // Cambia las líneas del onError para que apunten a un archivo de verdad:
+                        onError={(e) => { e.target.src = '/src/assets/banderas/default.png'; }}
                       />
                     </div>
                     <span className="nombre-pais-estadio">{partido.nombre_visitante}</span>
@@ -301,7 +302,9 @@ function CalendarioApuestas({ torneoId }) {
                 {/* Modal Local */}
                 <div className="bando-drawer-interactive local">
                   <div className="avatar-bandera-gigante">
-                    <img src={partidoSeleccionado.bandera_local || '/src/assets/banderas/default.png'} alt={partidoSeleccionado.nombre_local} onError={(e) => { e.target.src = '⚽'; }} />
+                    <img src={partidoSeleccionado.bandera_local || '/src/assets/banderas/default.png'} 
+                    alt={partidoSeleccionado.nombre_local} 
+                    onError={(e) => { e.target.src = '/src/assets/banderas/default.png'; }} />
                   </div>
                   <span className="nombre-pais-drawer">{partidoSeleccionado.nombre_local}</span>
                   <input
@@ -328,7 +331,9 @@ function CalendarioApuestas({ torneoId }) {
                   />
                   <span className="nombre-pais-drawer">{partidoSeleccionado.nombre_visitante}</span>
                   <div className="avatar-bandera-gigante">
-                    <img src={partidoSeleccionado.bandera_visitante || '/src/assets/banderas/default.png'} alt={partidoSeleccionado.nombre_visitante} onError={(e) => { e.target.src = '⚽'; }} />
+                    <img src={partidoSeleccionado.bandera_visitante || '/src/assets/banderas/default.png'} 
+                    alt={partidoSeleccionado.nombre_visitante} 
+                    onError={(e) => { e.target.src = '/src/assets/banderas/default.png'; }} />
                   </div>
                 </div>
 
