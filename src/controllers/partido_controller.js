@@ -102,42 +102,27 @@ export const registrarMarcadorOficial = async (req, res) => {
     await Partido.actualizarResultado(idPartidoInt, gLocalInt, gVisitanteInt);
 
     // 3. Responder de inmediato al Frontend para que pinte éxito en el dashboard
-    res.status(200).json({ 
-      ok: true, 
-      mensaje: '¡Marcador oficial asentado en la base de datos con éxito!' 
+    res.status(200).json({
+      ok: true,
+      mensaje: '¡Marcador oficial asentado en la base de datos con éxito!'
     });
 
-    // 4.DISPARAR EL MOTOR DE PUNTOS EN SEGUNDO PLANO
-    // Emulamos el req y res para que apuesta_controller procese las puntuaciones sin trabar la UI
+    // 4. DISPARAR EL MOTOR DE PUNTOS EN SEGUNDO PLANO RECONECTADO ✅
     setImmediate(async () => {
       try {
-        const mockReq = {
-          body: {
-            id_partido: idPartidoInt,
-            goles_local: gLocalInt,
-            goles_visitante: gVisitanteInt
-          }
-        };
+        console.log(`🤖 [Motor de Puntos] -> Iniciando cálculo para el partido ${idPartidoInt}`);
         
-        const mockRes = {
-          status: () => ({ 
-            json: (data) => console.log(`🤖 [Motor de Puntos] -> ${data.mensaje}`) 
-          })
-        };
-
-        await calcularPuntosPartidos(mockReq, mockRes);
+        // Llamamos directamente a tu función real con los datos limpios
+        await procesarPuntosPartido(idPartidoInt, gLocalInt, gVisitanteInt);
+        
+        console.log(`🤖 [Motor de Puntos] -> Procesamiento completado con éxito.`);
       } catch (errorPuntos) {
-        console.error('Error en el background worker de puntuación:', errorPuntos);
+        console.error('❌ Error en el background worker de puntuación:', errorPuntos);
       }
     });
 
   } catch (error) {
-    console.error('Error crítico en registrarMarcadorOficial:', error);
-    if (!res.headersSent) {
-      res.status(500).json({ 
-        ok: false, 
-        mensaje: 'Fallo crítico al insertar el marcador en la base de datos.' 
-      });
-    }
+    console.error('Error crítico en registrarMarcadorOficial...', error);
+    res.status(500).json({ mensaje: 'Error al registrar el resultado' });
   }
 };

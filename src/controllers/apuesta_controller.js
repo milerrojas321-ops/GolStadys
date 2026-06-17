@@ -1,4 +1,5 @@
 import Apuesta from '../models/apuesta.js';
+import { procesarPuntosPartido } from './apuesta_controller.js';
 
 export const registrarApuesta = async (req, res) => {
   const { 
