@@ -93,9 +93,14 @@ export const obtenerApuestasUsuario = async (req, res) => {
 };
 
 export const calcularPuntosPartidos = async (req, res) => {
-  const { id_partido, goles_local, goles_visitante } = req.body;
+  // Soportamos ambos formatos de nombres por si acaso (goles_local o goles_local_real)
+  const id_partido = req.body.id_partido;
+  const goles_local = req.body.goles_local !== undefined ? req.body.goles_local : req.body.goles_local_real;
+  const goles_visitante = req.body.goles_visitante !== undefined ? req.body.goles_visitante : req.body.goles_visitante_real;
 
   try {
+    console.log(`🤖 [Motor de Puntos] -> Iniciando procesamiento para partido ID: ${id_partido}. Marcador oficial: ${goles_local}-${goles_visitante}`);
+
     // 1. Convertir los goles reales ingresados a números enteros
     const goles_local_real = parseInt(goles_local, 10);
     const goles_visitante_real = parseInt(goles_visitante, 10);
@@ -109,25 +114,31 @@ export const calcularPuntosPartidos = async (req, res) => {
     const apuestasUsuarios = await Apuesta.obtenerApuestasPorPartido(id_partido);
 
     if (!apuestasUsuarios || apuestasUsuarios.length === 0) {
+      console.log(`⚠️ [Motor de Puntos] -> No se encontraron apuestas con estado 'pendiente' para el partido ${id_partido}`);
       return res.status(200).json({
         ok: true,
-        mensaje: 'Marcador registrado, pero no había apuestas pendientes para este partido.'
+        mensaje: 'Marcador registrado, pero no había apuestas con estado pendiente para este partido.'
       });
     }
+
+    console.log(`🔥 [Motor de Puntos] -> Encontradas ${apuestasUsuarios.length} apuestas pendientes para procesar.`);
 
     // 4. Bucle analítico sobre cada apuesta individual
     for (const apuesta of apuestasUsuarios) {
       const pLocal = parseInt(apuesta.prediccion_goles_local, 10);
       const pVisitante = parseInt(apuesta.prediccion_goles_visitante, 10);
 
-      // Determinar matemáticamente la tendencia que predijo el usuario
-      let tendenciaPredicha = 'E';
-      if (pLocal > pVisitante) tendenciaPredicha = 'L';
-      if (pLocal < pVisitante) tendenciaPredicha = 'V';
+      // Determinar matemáticamente la tendencia que predijo el usuario si no venía de la BD
+      let tendenciaPredicha = apuesta.tendencia_predicha;
+      if (!tendenciaPredicha) {
+        tendenciaPredicha = 'E';
+        if (pLocal > pVisitante) tendenciaPredicha = 'L';
+        if (pLocal < pVisitante) tendenciaPredicha = 'V';
+      }
 
       let puntosGanados = 0;
 
-      // 🥇 REGLA 1: Marcador idéntico perfecto (5 Puntos) -> ¡Soporta empates como 5-5 o 0-0!
+      // 🥇 REGLA 1: Marcador idéntico perfecto (5 Puntos)
       if (pLocal === goles_local_real && pVisitante === goles_visitante_real) {
         puntosGanados = 5;
       } 
@@ -135,14 +146,16 @@ export const calcularPuntosPartidos = async (req, res) => {
       else if (tendenciaPredicha === tendenciaReal && (pLocal === goles_local_real || pVisitante === goles_visitante_real)) {
         puntosGanados = 3;
       } 
-      // 🥉 REGLA 3: Acertó solo quién ganaba/perdía o empataba sin dar los goles exactos (1 Punto)
+      // 🥉 REGLA 3: Acertó solo la tendencia general (2 Puntos como tenías en tu regla de negocio)
       else if (tendenciaPredicha === tendenciaReal) {
-        puntosGanados = 1;
+        puntosGanados = 2;
       } 
       // ❌ REGLA 4: Falló por completo (0 Puntos)
       else {
         puntosGanados = 0;
       }
+
+      console.log(`👤 Usuario ID ${apuesta.id_usuario} predijo ${pLocal}-${pVisitante}. Puntos asignados: ${puntosGanados}`);
 
       // 5. Persistir de forma atómica en la BD (Suma puntos al usuario y cierra la apuesta)
       await Apuesta.aplicarPuntuacion(apuesta.id_apuesta, apuesta.id_usuario, puntosGanados);
@@ -150,67 +163,16 @@ export const calcularPuntosPartidos = async (req, res) => {
 
     return res.status(200).json({
       ok: true,
-      mensaje: `¡Cálculo analítico completado con éxito! Se procesaron ${apuestasUsuarios.length} apuestas.`
+      mensaje: `¡Cálculo analítico completado con éxito! Se liquidaron ${apuestasUsuarios.length} apuestas.`
     });
 
   } catch (error) {
     console.error('❌ Error crítico en el motor de puntos:', error);
-    return res.status(500).json({ ok: false, mensaje: 'Error interno al calcular la puntuación.' });
+    if (!res.headersSent) {
+      return res.status(500).json({ ok: false, mensaje: 'Error interno al calcular la puntuación.' });
+    }
   }
 };
 
-export const procesarPuntosPartido = async (req, res) => {
-  const { id_partido, goles_local_real, goles_visitante_real } = req.body;
-
-  try {
-    // 1. Buscar todas las apuestas que hicieron los usuarios para este partido
-    const apuestasUsuarios = await Apuesta.obtenerApuestasPorPartido(id_partido);
-
-    if (apuestasUsuarios.length === 0) {
-      return res.status(200).json({ ok: true, mensaje: 'No hay apuestas pendientes por calcular en este partido.' });
-    }
-
-    // Determinar la tendencia real del partido (Gana Local, Gana Visitante o Empate)
-    let tendenciaReal = 'E';
-    if (goles_local_real > goles_visitante_real) tendenciaReal = 'L';
-    if (goles_local_real < goles_visitante_real) tendenciaReal = 'V';
-
-    // 2. Bucle inteligente para evaluar cada apuesta una por una
-    for (const apuesta of apuestasUsuarios) {
-      const pLocal = apuesta.prediccion_goles_local;
-      const pVisitante = apuesta.prediccion_goles_visitante;
-      const tendenciaPredicha = apuesta.tendencia_predicha; // 'L', 'V' o 'E'
-
-      let puntosGanados = 0;
-
-      // REGLA 1: Marcador idéntico y perfecto (5 Puntos)
-      if (pLocal === goles_local_real && pVisitante === goles_visitante_real) {
-        puntosGanados = 5;
-      } 
-      // REGLA 2: Adivinó el ganador/empate Y le pegó a los goles de AL MENOS un equipo (3 Puntos)
-      else if (tendenciaPredicha === tendenciaReal && (pLocal === goles_local_real || pVisitante === goles_visitante_real)) {
-        puntosGanados = 3;
-      } 
-      // REGLA 3: Solo adivinó la tendencia simple (Ganador o empate general) (2 Puntos)
-      else if (tendenciaPredicha === tendenciaReal) {
-        puntosGanados = 2;
-      } 
-      // REGLA 4: Falló por completo (0 Puntos)
-      else {
-        puntosGanados = 0;
-      }
-
-      // 3. Persistir los puntos calculados en la BD usando el modelo
-      await Apuesta.aplicarPuntuacion(apuesta.id_apuesta, apuesta.id_usuario, puntosGanados);
-    }
-
-    return res.status(200).json({
-      ok: true,
-      mensaje: `¡Cerebro de puntuación ejecutado! Se procesaron ${apuestasUsuarios.length} apuestas correctamente.`
-    });
-
-  } catch (error) {
-    console.error('Error en el cerebro de puntuación:', error);
-    return res.status(500).json({ ok: false, mensaje: 'Error interno al liquidar los puntos del partido.' });
-  }
-}
+// Dejamos un alias por si acaso tu partido_controller.js importa 'procesarPuntosPartido'
+export const procesarPuntosPartido = calcularPuntosPartidos;
