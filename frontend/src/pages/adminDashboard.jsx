@@ -20,7 +20,7 @@ function AdminDashboard({ alCerrarSesion, usuarioGlobal }) {
 
   // Estados para el formulario de nuevo partido
   const [nuevoPartido, setNuevoPartido] = useState({
-    id_campeonato: '',
+    id_torneo: '',
     id_local: '',
     id_visitante: '',
     fecha_hora: '', 
@@ -77,82 +77,91 @@ function AdminDashboard({ alCerrarSesion, usuarioGlobal }) {
       });
   };
 
-  const manejarCrearPartido = (e) => {
-    e.preventDefault();
-    
-    if (nuevoPartido.id_local === nuevoPartido.id_visitante) {
-      mostrarFeedback('El equipo local y visitante no pueden ser el mismo', 'error');
+  const manejarCrearPartido = async () => {
+    // 🎯 Capturamos los datos asegurando que id_torneo no llegue vacío ni en String
+    const datosParaBackend = {
+      id_torneo: parseInt(nuevoPartido.id_torneo, 10),
+      id_local: parseInt(nuevoPartido.id_local, 10),
+      id_visitante: parseInt(nuevoPartido.id_visitante, 10),
+      fecha_hora: nuevoPartido.fecha_hora
+    };
+
+    // Validación básica antes de enviar
+    if (!datosParaBackend.id_torneo || !datosParaBackend.id_local || !datosParaBackend.id_visitante || !datosParaBackend.fecha_hora) {
+      mostrarFeedback('Por favor, completa todos los campos para crear el partido.', 'error');
       return;
     }
 
-    fetch('https://golstadys-production.up.railway.app/api/partidos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(nuevoPartido)
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('Error al guardar partido');
-        return res.json();
-      })
-      .then(() => {
-        mostrarFeedback('¡Partido inyectado correctamente en el sistema!', 'exito');
-        fetchPartidos();
-        setNuevoPartido({ id_campeonato: '', id_local: '', id_visitante: '', fecha_hora: '', estado: 'programado' });
-      })
-      .catch((err) => {
-        console.error(err);
-        mostrarFeedback('Error de llave foránea: Verifica los IDs ingresados', 'error');
+    try {
+      setCargando(true);
+      const respuesta = await fetch('https://golstadys-production.up.railway.app/api/partidos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datosParaBackend), // Envíos limpios al backend
       });
+
+      const datos = await respuesta.json();
+
+      if (respuesta.ok) {
+        mostrarFeedback('¡Partido programado y registrado con éxito!', 'exito');
+        // Limpiamos el formulario
+        setNuevoPartido({
+          id_torneo: '',
+          id_local: '',
+          id_visitante: '',
+          fecha_hora: '',
+          estado: 'programado',
+        });
+        // Recargamos la lista de partidos en tiempo real
+        fetchPartidos();
+      } else {
+        mostrarFeedback(datos.mensaje || 'Error al guardar el partido.', 'error');
+      }
+    } catch (error) {
+      console.error('Error de red en manejarCrearPartido:', error);
+      mostrarFeedback('Error de conexión con el servidor de GolStadys.', 'error');
+    } finally {
+      setCargando(false);
+    }
   };
 
-  const manejarGuardarResultadoDirecto = async (idPartido) => {
-  const marcador = marcadoresEnTabla[idPartido];
-  if (!marcador || marcador.goles_local === '' || marcador.goles_visitante === '') {
-    mostrarFeedback('Por favor, ingresa ambos marcadores', 'error');
-    return;
-  }
-
-  try {
-    mostrarFeedback('Guardando marcador oficial...', 'info');
-
-    // ✅ CONEXIÓN CORREGIDA: Método POST y ruta con '/resultado' al final
-    const respuesta = await fetch(`https://golstadys-production.up.railway.app/api/partidos/${idPartido}/resultado`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        goles_local: parseInt(marcador.goles_local, 10),
-        goles_visitante: parseInt(marcador.goles_visitante, 10)
-      })
-    });
-
-    const datos = await respuesta.json();
-
-    if (respuesta.ok) {
-      mostrarFeedback('¡Marcador guardado y puntos calculados con éxito!', 'exito');
-      
-      // Actualizar el estado visual solo si el servidor guardó los datos de verdad
-      setPartidos(partidosAnteriores =>
-        partidosAnteriores.map(p =>
-          p.id_partido === idPartido
-            ? { 
-                ...p, 
-                goles_local_real: parseInt(marcador.goles_local, 10), 
-                goles_visitante_real: parseInt(marcador.goles_visitante, 10), 
-                estado_partido: 'finalizado' 
-              }
-            : p
-        )
-      );
-    } else {
-      mostrarFeedback(datos.mensaje || 'Error al guardar en el servidor', 'error');
+const manejarGuardarResultadoDirecto = async (idPartido) => {
+    const marcador = marcadoresEnTabla[idPartido];
+    if (!marcador || marcador.goles_local === '' || marcador.goles_visitante === '') {
+      mostrarFeedback('Por favor, ingresa los goles de ambos equipos antes de guardar.', 'error');
+      return;
     }
-  } catch (error) {
-    console.error('❌ Error al conectar con el backend:', error);
-    mostrarFeedback('Error de comunicación con el servidor', 'error');
-  }
-};
+
+    try {
+      // 🎯 RUTA CORREGIDA: Cambiada para que coincida con router.post('/partidos/:id_partido/resultado')
+      const urlCorrecta = `https://golstadys-production.up.railway.app/api/partidos/${idPartido}/resultado`;
+
+      const respuesta = await fetch(urlCorrecta, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          goles_local: parseInt(marcador.goles_local, 10),
+          goles_visitante: parseInt(marcador.goles_visitante, 10),
+        }),
+      });
+
+      const datos = await respuesta.json();
+
+      if (respuesta.ok) {
+        mostrarFeedback('¡Marcador oficial asentado y puntos distribuidos!', 'exito');
+        fetchPartidos(); // Refrescar la tabla
+      } else {
+        mostrarFeedback(datos.mensaje || 'No se pudo registrar el marcador.', 'error');
+      }
+    } catch (error) {
+      console.error('❌ Error en el frontend al enviar marcador:', error);
+      mostrarFeedback('Error de red al conectar con el servidor.', 'error');
+    }
+  };
 
   const manejarCambioInputMarcador = (idPartido, campo, valor) => {
     setMarcadoresEnTabla({
@@ -207,8 +216,8 @@ function AdminDashboard({ alCerrarSesion, usuarioGlobal }) {
                 <div className="campo-admin">
                   <label>Campeonato / Torneo</label>
                   <select 
-                    value={nuevoPartido.id_campeonato} 
-                    onChange={(e) => setNuevoPartido({ ...nuevoPartido, id_campeonato: e.target.value })} 
+                    value={nuevoPartido.id_torneo} 
+                    onChange={(e) => setNuevoPartido({ ...nuevoPartido, id_torneo: e.target.value })} 
                     required
                     className="select-admin-input"
                   >
