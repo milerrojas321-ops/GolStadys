@@ -109,20 +109,31 @@ function CalendarioApuestas({ torneoId }) {
     return;
   }
 
-  // Calcular tendencia automáticamente para que el backend no reciba datos vacíos
+  // 1. Extraer el ID de usuario de forma segura
+  const tokenGolstadys = localStorage.getItem('token_golstadys');
+  let idUsuarioReal = null;
+
+  if (tokenGolstadys) {
+    if (tokenGolstadys.includes('_')) {
+      idUsuarioReal = parseInt(tokenGolstadys.split('_')[1], 10);
+    } else {
+      idUsuarioReal = parseInt(tokenGolstadys, 10); // Por si guardaste el ID directo
+    }
+  }
+
+  // 🚨 VALIDACIÓN CRÍTICA: Si no hay usuario, frena la petición antes de que rompa el backend
+  if (!idUsuarioReal || isNaN(idUsuarioReal)) {
+    alert("Tu sesión ha expirado o no es válida. Por favor, vuelve a iniciar sesión.");
+    console.error("❌ Error: No se pudo obtener un id_usuario válido del localStorage.");
+    return;
+  }
+
   let tendencia = 'E';
   if (golesLocal > golesVisitante) tendencia = 'L';
   if (golesLocal < golesVisitante) tendencia = 'V';
 
-  const tokenGolstadys = localStorage.getItem('token_golstadys');
-  let idUsuarioReal = null;
-  if (tokenGolstadys) {
-    const partes = tokenGolstadys.split('_');
-    idUsuarioReal = partes[1]; // Extraer ID del token format
-  }
-
   const payload = {
-    id_usuario: parseInt(idUsuarioReal, 10),
+    id_usuario: idUsuarioReal, // Ya garantizamos que es un número real
     id_partido: partido.id_partido,
     prediccion_goles_local: golesLocal,
     prediccion_goles_visitante: golesVisitante,
@@ -140,6 +151,8 @@ function CalendarioApuestas({ torneoId }) {
     if (respuesta.ok) {
       alert("¡Tu pronóstico ha sido fijado con éxito!");
       cerrarPanelApuesta();
+      // Opcional: recargar datos para que se vea reflejado el cambio
+      if (typeof cargarPartidosYApuestas === 'function') cargarPartidosYApuestas();
     } else {
       alert(`Error: ${datos.mensaje}`);
     }
