@@ -190,20 +190,28 @@ export const obtenerTodasLasSelecciones = async (req, res) => {
   }
 };
 
-// 🎯 AQUÍ ESTÁ LA FUNCIÓN CORREGIDA SIN PROCESOS EN SEGUNDO PLANO SORDOS
 export const registrarMarcadorOficial = async (req, res) => {
-  const { id_partido } = req.params;
+  // 🎯 CAPTURA MULTIPLE: Si el front mandó id_partido, idPartido o torneoId, lo atrapamos sí o sí
+  const id_partido = req.params.id_partido || req.params.idPartido || req.body.id_partido;
   const { goles_local, goles_visitante } = req.body;
 
   try {
+    if (!id_partido) {
+      console.error("❌ [Backend] Error: El frontend no envió el ID del partido en la petición.");
+      return res.status(400).json({ ok: false, mensaje: 'Falta el ID del partido.' });
+    }
+
     const idPartidoInt = parseInt(id_partido, 10);
     const gLocalInt = parseInt(goles_local, 10);
     const gVisitanteInt = parseInt(goles_visitante, 10);
 
-    // 1. Actualizar el partido en la BD
-    await Partido.actualizarResultado(idPartidoInt, gLocalInt, gVisitanteInt);
+    console.log(`📥 [Admin Center] Procesando Partido ID: ${idPartidoInt}. Marcador: ${gLocalInt}-${gVisitanteInt}`);
 
-    // 2. Ejecutar el motor de puntos esperando a que termine de forma síncrona
+    // 1. Actualizar el estado del partido en MySQL
+    await Partido.actualizarResultado(idPartidoInt, gLocalInt, gVisitanteInt);
+    console.log(`✅ [MySQL] Tabla 'partidos' actualizada con éxito.`);
+
+    // 2. Preparar la carga para el motor de puntos de las apuestas
     const mockReq = {
       body: {
         id_partido: idPartidoInt,
@@ -214,22 +222,28 @@ export const registrarMarcadorOficial = async (req, res) => {
       }
     };
 
+    // Capturador del flujo de respuesta del motor de apuestas
+    let logMotor = '';
     const mockRes = {
-      status: () => ({ 
-        json: (data) => console.log(`🤖 [Motor de Puntos] Ejecutado: ${data.mensaje}`) 
+      status: (codigo) => ({
+        json: (data) => { logMotor = data.mensaje; }
       })
     };
 
-    // Llamamos a la función usando el nombre importado arriba
+    console.log(`🤖 [Motor] Pasando datos a calcularPuntosPartidos...`);
+    
+    // Ejecución síncrona obligatoria
     await calcularPuntosPartidos(mockReq, mockRes);
+    
+    console.log(`🎉 [Motor] Respuesta final: ${logMotor}`);
 
     return res.status(200).json({ 
       ok: true, 
-      mensaje: '¡Marcador oficial asentado y puntos de las apuestas liquidados!' 
+      mensaje: `Marcador asentado. Detalle del motor: ${logMotor}` 
     });
 
   } catch (error) {
-    console.error('Error en registrarMarcadorOficial:', error);
-    return res.status(500).json({ ok: false, mensaje: 'Error interno del servidor.' });
+    console.error('❌ Error crítico en registrarMarcadorOficial:', error);
+    return res.status(500).json({ ok: false, mensaje: 'Error interno en el servidor.' });
   }
 };
