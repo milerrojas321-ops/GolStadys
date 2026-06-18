@@ -42,11 +42,11 @@ export const registrarApuesta = async (req, res) => {
     // Calcular la diferencia exacta expresada en horas reales
     const diferenciaHoras = (momentoPartido - momentoActual) / (1000 * 60 * 60);
 
-    //  REGLA DE NEGOCIO: Bloqueo a menos de 5 horas del partido
-    if (diferenciaHoras < 0.5) {
+    //  REGLA DE NEGOCIO: Bloqueo a menos de 1 hora del partido
+    if (diferenciaHoras < 1) {
       return res.status(400).json({
         ok: false,
-        mensaje: 'Pronóstico bloqueado. No puedes fijar o editar marcadores a menos de 5 horas del partido.'
+        mensaje: 'Pronóstico bloqueado. No puedes fijar o editar marcadores a menos de 1 hora del partido.'
       });
     }
 
@@ -99,7 +99,7 @@ export const calcularPuntosPartidos = async (req, res) => {
   const goles_visitante = req.body.goles_visitante !== undefined ? req.body.goles_visitante : req.body.goles_visitante_real;
 
   try {
-    console.log(`🤖 [Motor de Puntos] -> Iniciando procesamiento para partido ID: ${id_partido}. Marcador oficial: ${goles_local}-${goles_visitante}`);
+    console.log(`[Motor de Puntos] -> Iniciando procesamiento para partido ID: ${id_partido}. Marcador oficial: ${goles_local}-${goles_visitante}`);
 
     // 1. Convertir los goles reales ingresados a números enteros
     const goles_local_real = parseInt(goles_local, 10);
@@ -167,7 +167,7 @@ export const calcularPuntosPartidos = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error crítico en el motor de puntos:', error);
+    console.error('Error crítico en el motor de puntos:', error);
     if (!res.headersSent) {
       return res.status(500).json({ ok: false, mensaje: 'Error interno al calcular la puntuación.' });
     }

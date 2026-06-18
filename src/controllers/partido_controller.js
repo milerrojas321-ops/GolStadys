@@ -132,8 +132,7 @@
 
 // src/controllers/partido_controller.js
 import Partido from '../models/partido_model.js';
-// 🎯 IMPORTAMOS LAS DOS POR SI ACASO, ASÍ NO FALLA NINGÚN NOMBRE
-import { calcularPuntosPartidos, procesarPuntosPartido } from './apuesta_controller.js';
+import { calcularPuntosPartidos } from './apuesta_controller.js';
 
 export const obtenerPartidosPorTorneo = async (req, res) => {
   try {
@@ -191,27 +190,25 @@ export const obtenerTodasLasSelecciones = async (req, res) => {
 };
 
 export const registrarMarcadorOficial = async (req, res) => {
-  // 🎯 CAPTURA MULTIPLE: Si el front mandó id_partido, idPartido o torneoId, lo atrapamos sí o sí
+  // Captura múltiple por si el parámetro viene como id_partido o idPartido
   const id_partido = req.params.id_partido || req.params.idPartido || req.body.id_partido;
   const { goles_local, goles_visitante } = req.body;
 
   try {
     if (!id_partido) {
-      console.error("❌ [Backend] Error: El frontend no envió el ID del partido en la petición.");
-      return res.status(400).json({ ok: false, mensaje: 'Falta el ID del partido.' });
+      return res.status(400).json({ ok: false, mensaje: 'El ID del partido es requerido.' });
     }
 
     const idPartidoInt = parseInt(id_partido, 10);
     const gLocalInt = parseInt(goles_local, 10);
     const gVisitanteInt = parseInt(goles_visitante, 10);
 
-    console.log(`📥 [Admin Center] Procesando Partido ID: ${idPartidoInt}. Marcador: ${gLocalInt}-${gVisitanteInt}`);
+    console.log(`📥 [Admin] Actualizando Partido ${idPartidoInt} con marcador ${gLocalInt}-${gVisitanteInt}`);
 
-    // 1. Actualizar el estado del partido en MySQL
+    // 1. Guardar el resultado en la tabla partidos
     await Partido.actualizarResultado(idPartidoInt, gLocalInt, gVisitanteInt);
-    console.log(`✅ [MySQL] Tabla 'partidos' actualizada con éxito.`);
 
-    // 2. Preparar la carga para el motor de puntos de las apuestas
+    // 2. Ejecutar el motor de puntos síncronamente pasándole las variables idénticas
     const mockReq = {
       body: {
         id_partido: idPartidoInt,
@@ -222,28 +219,22 @@ export const registrarMarcadorOficial = async (req, res) => {
       }
     };
 
-    // Capturador del flujo de respuesta del motor de apuestas
-    let logMotor = '';
     const mockRes = {
-      status: (codigo) => ({
-        json: (data) => { logMotor = data.mensaje; }
+      status: () => ({
+        json: (data) => console.log(`🤖 [Motor Puntos DB]: ${data.mensaje}`)
       })
     };
 
-    console.log(`🤖 [Motor] Pasando datos a calcularPuntosPartidos...`);
-    
-    // Ejecución síncrona obligatoria
+    // Forzamos el await aquí para que la petición no muera en Railway antes de tiempo
     await calcularPuntosPartidos(mockReq, mockRes);
-    
-    console.log(`🎉 [Motor] Respuesta final: ${logMotor}`);
 
     return res.status(200).json({ 
       ok: true, 
-      mensaje: `Marcador asentado. Detalle del motor: ${logMotor}` 
+      mensaje: '¡Marcador oficial registrado y apuestas procesadas exitosamente!' 
     });
 
   } catch (error) {
     console.error('❌ Error crítico en registrarMarcadorOficial:', error);
-    return res.status(500).json({ ok: false, mensaje: 'Error interno en el servidor.' });
+    return res.status(500).json({ ok: false, mensaje: 'Error interno del servidor.' });
   }
 };
