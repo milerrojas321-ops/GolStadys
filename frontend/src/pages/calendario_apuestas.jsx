@@ -101,65 +101,82 @@ function CalendarioApuestas({ torneoId }) {
   };
 
   const guardarCambiosApuesta = async (partido) => {
-  const golesLocal = parseInt(predicciones[partido.id_partido]?.local, 10);
-  const golesVisitante = parseInt(predicciones[partido.id_partido]?.visitante, 10);
+    const golesLocal = parseInt(predicciones[partido.id_partido]?.local, 10);
+    const golesVisitante = parseInt(predicciones[partido.id_partido]?.visitante, 10);
 
-  if (isNaN(golesLocal) || isNaN(golesVisitante)) {
-    alert("Por favor ingresa un marcador válido.");
-    return;
-  }
-
-  // 1. Extraer el ID de usuario de forma segura
-  const tokenGolstadys = localStorage.getItem('token_golstadys');
-  let idUsuarioReal = null;
-
-  if (tokenGolstadys) {
-    if (tokenGolstadys.includes('_')) {
-      idUsuarioReal = parseInt(tokenGolstadys.split('_')[1], 10);
-    } else {
-      idUsuarioReal = parseInt(tokenGolstadys, 10); // Por si guardaste el ID directo
+    if (isNaN(golesLocal) || isNaN(golesVisitante)) {
+      alert("Por favor ingresa un marcador válido.");
+      return;
     }
-  }
 
-  // 🚨 VALIDACIÓN CRÍTICA: Si no hay usuario, frena la petición antes de que rompa el backend
-  if (!idUsuarioReal || isNaN(idUsuarioReal)) {
-    alert("Tu sesión ha expirado o no es válida. Por favor, vuelve a iniciar sesión.");
-    console.error("❌ Error: No se pudo obtener un id_usuario válido del localStorage.");
-    return;
-  }
+    // 🕵️‍♂️ PROCESADOR INTELIGENTE DE USUARIO
+    const tokenGolstadys = localStorage.getItem('token_golstadys');
+    let idUsuarioReal = null;
 
-  let tendencia = 'E';
-  if (golesLocal > golesVisitante) tendencia = 'L';
-  if (golesLocal < golesVisitante) tendencia = 'V';
+    if (tokenGolstadys) {
+      try {
+        // Caso 1: Si es un objeto de texto JSON (como el tuyo que empieza con '{')
+        if (tokenGolstadys.startsWith('{')) {
+          const objetoUsuario = JSON.parse(tokenGolstadys);
+          idUsuarioReal = parseInt(objetoUsuario.id_usuario, 10);
+        } 
+        // Caso 2: Por si acaso quedan tokens viejos con guion bajo (ej: USER_4)
+        else if (tokenGolstadys.includes('_')) {
+          idUsuarioReal = parseInt(tokenGolstadys.split('_')[1], 10);
+        } 
+        // Caso 3: Si es solo el número del ID limpio suelto (ej: 4)
+        else {
+          idUsuarioReal = parseInt(tokenGolstadys, 10);
+        }
+      } catch (errorJson) {
+        console.error("Error al procesar el token de sesión:", errorJson);
+      }
+    }
 
-  const payload = {
-    id_usuario: idUsuarioReal, // Ya garantizamos que es un número real
-    id_partido: partido.id_partido,
-    prediccion_goles_local: golesLocal,
-    prediccion_goles_visitante: golesVisitante,
-    tendencia_predicha: tendencia
+    // 🚨 CONTROL DE SEGURIDAD INTERNO
+    if (!idUsuarioReal || isNaN(idUsuarioReal)) {
+      alert("Tu sesión ha expirado o no es válida. Por favor, vuelve a iniciar sesión.");
+      console.error("❌ Error: No se pudo obtener un id_usuario numérico válido.");
+      return;
+    }
+
+    // Calculamos la tendencia para enviársela limpia a la base de datos
+    let tendencia = 'E';
+    if (golesLocal > golesVisitante) tendencia = 'L';
+    if (golesLocal < golesVisitante) tendencia = 'V';
+
+    const payload = {
+      id_usuario: idUsuarioReal, // Mandará el número 4 limpio sin romper el backend
+      id_partido: partido.id_partido,
+      prediccion_goles_local: golesLocal,
+      prediccion_goles_visitante: golesVisitante,
+      tendencia_predicha: tendencia
+    };
+
+    try {
+      const respuesta = await fetch('https://golstadys-production.up.railway.app/api/apuestas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      const datos = await respuesta.json();
+      if (respuesta.ok) {
+        alert("¡Tu pronóstico ha sido fijado con éxito!");
+        cerrarPanelApuesta();
+        
+        // Si tienes la función de recarga, actualiza el fixture en tiempo real
+        if (typeof cargarPartidosYApuestas === 'function') {
+          cargarPartidosYApuestas();
+        }
+      } else {
+        alert(`Error en el servidor: ${datos.mensaje}`);
+      }
+    } catch (error) {
+      console.error("Error de red al guardar apuesta:", error);
+      alert("No se pudo conectar con el servidor de GolStadys.");
+    }
   };
-
-  try {
-    const respuesta = await fetch('https://golstadys-production.up.railway.app/api/apuestas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    
-    const datos = await respuesta.json();
-    if (respuesta.ok) {
-      alert("¡Tu pronóstico ha sido fijado con éxito!");
-      cerrarPanelApuesta();
-      // Opcional: recargar datos para que se vea reflejado el cambio
-      if (typeof cargarPartidosYApuestas === 'function') cargarPartidosYApuestas();
-    } else {
-      alert(`Error: ${datos.mensaje}`);
-    }
-  } catch (error) {
-    console.error("Error al guardar apuesta:", error);
-  }
-};
 
   if (cargando) {
     return (
