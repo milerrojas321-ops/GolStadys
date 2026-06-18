@@ -94,17 +94,6 @@ const Partido = {
     ]);
     return resultado;
   },
-
-  // 🆕 MÉTODO SQL: Registra los goles y clausura el partido cambiando el estado
-  actualizarResultado: async (idPartido, golesLocal, golesVisitante) => {
-    const querySQL = `
-      UPDATE partidos 
-      SET goles_local_real = ?, goles_visitante_real = ?, estado_partido = 'finalizado'
-      WHERE id_partido = ?
-    `;
-    const [resultado] = await db.query(querySQL, [golesLocal, golesVisitante, idPartido]);
-    return resultado;
-  }
 };
 
 export default Partido;

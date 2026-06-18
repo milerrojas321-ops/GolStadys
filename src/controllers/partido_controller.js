@@ -80,53 +80,52 @@ export const crearNuevoPartido = async (req, res) => {
 };
 
 export const registrarMarcadorOficial = async (req, res) => {
-  const { id_partido } = req.params;
-  const { goles_local, goles_visitante } = req.body;
-
   try {
-    // Convertir a enteros para asegurar que no viajen como texto
+    const { id_partido } = req.params;
+    const { goles_local, goles_visitante } = req.body;
+
+    // 1. Convertir estrictamente a números enteros
     const idPartidoInt = parseInt(id_partido, 10);
     const gLocalInt = parseInt(goles_local, 10);
     const gVisitanteInt = parseInt(goles_visitante, 10);
 
-    // 1. Actualizar el partido en la BD
+    console.log(`📥 [Admin] Registrando marcador para partido ${idPartidoInt}: ${gLocalInt}-${gVisitanteInt}`);
+
+    // 2. Ejecutar la actualización del partido en la BD usando tu modelo nativo
     await Partido.actualizarResultado(idPartidoInt, gLocalInt, gVisitanteInt);
+    console.log(`✅ [Base de Datos] Partido ${idPartidoInt} actualizado a 'finalizado'.`);
 
-    // 2. Disparar el motor de puntos de forma segura
-    setImmediate(async () => {
-      try {
-        // Creamos el objeto exactamente como lo espera calcularPuntosPartidos
-        const mockReq = {
-          body: {
-            id_partido: idPartidoInt,
-            goles_local: gLocalInt,         // 🎯 Nombre exacto que lee tu apuesta_controller
-            goles_visitante: gVisitanteInt,   // 🎯 Nombre exacto que lee tu apuesta_controller
-            goles_local_real: gLocalInt,    // Por respaldo
-            goles_visitante_real: gVisitanteInt // Por respaldo
-          }
-        };
-
-        const mockRes = {
-          status: () => ({ json: (data) => console.log("🤖 [Motor Puntos] Respuesta:", data) })
-        };
-
-        console.log(`🚀 [Backend] Disparando motor de puntos para el partido ${idPartidoInt}`);
-        
-        // Llamamos a la función unificada que arreglamos en el paso anterior
-        await calcularPuntosPartidos(mockReq, mockRes);
-
-      } catch (err) {
-        console.error("❌ Error crítico dentro del proceso setImmediate:", err);
+    // 3. EJECUTAR EL MOTOR DE PUNTOS INMEDIATAMENTE (Sin setImmediate para evitar que Railway lo mate)
+    console.log(`🤖 [Motor] Iniciando cálculo analítico de puntos...`);
+    
+    const mockReq = {
+      body: {
+        id_partido: idPartidoInt,
+        goles_local: gLocalInt,
+        goles_visitante: gVisitanteInt
       }
-    });
+    };
 
+    // Objeto de respuesta simulado para capturar lo que haga el controlador de apuestas
+    let respuestaMotor = '';
+    const mockRes = {
+      status: (codigo) => ({
+        json: (data) => { respuestaMotor = data.mensaje; }
+      })
+    };
+
+    // Forzamos la espera con await para que no se salte el proceso
+    await calcularPuntosPartidos(mockReq, mockRes);
+    console.log(`🎉 [Motor] Resultado del procesamiento: ${respuestaMotor}`);
+
+    // 4. RESPONDER AL FRONTEND SÓLO CUANDO TODO EL TRABAJO HAYA TERMINADO
     return res.status(200).json({ 
       ok: true, 
-      mensaje: 'Marcador oficial registrado. El motor de puntos se está ejecutando en segundo plano.' 
+      mensaje: `¡Marcador oficial asentado y puntos liquidados con éxito! (${respuestaMotor})` 
     });
 
   } catch (error) {
-    console.error('❌ Error en registrarMarcadorOficial:', error);
-    return res.status(500).json({ ok: false, mensaje: 'Error interno del servidor.' });
+    console.error('❌ Error crítico en registrarMarcadorOficial:', error);
+    return res.status(500).json({ ok: false, mensaje: 'Error interno del servidor al cerrar el partido.' });
   }
 };
