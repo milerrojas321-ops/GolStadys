@@ -66,7 +66,7 @@ function CalendarioApuestas({ torneoId }) {
         setPartidos(partidosCruzados);
         setCargando(false);
       } catch (error) {
-        console.error('❌ Error al cargar la estructura del fixture:', error);
+        console.error('Error al cargar la estructura del fixture:', error);
         setCargando(false);
       }
     };
@@ -113,7 +113,7 @@ function CalendarioApuestas({ torneoId }) {
     const tokenGolstadys = localStorage.getItem('token_golstadys');
 
     if (!tokenGolstadys) {
-      alert('❌ Error: Sesión inválida o expirada. Por favor, vuelve a iniciar sesión en GolStadys.');
+      alert('Error: Sesión inválida o expirada. Por favor, vuelve a iniciar sesión en GolStadys.');
       return;
     }
 
@@ -133,7 +133,7 @@ function CalendarioApuestas({ torneoId }) {
 
     // Validación por si el string del token llega a estar corrupto o vacío
     if (!idUsuarioReal || isNaN(idUsuarioReal)) {
-      alert('❌ Error: No se pudo descifrar tu ID de jugador. Cierra sesión y vuelve a entrar.');
+      alert('Error: No se pudo descifrar tu ID de jugador. Cierra sesión y vuelve a entrar.');
       return;
     }
 
@@ -180,11 +180,11 @@ function CalendarioApuestas({ torneoId }) {
 
         cerrarPanelApuesta();
       } else {
-        alert(`❌ Error al guardar: ${resultado.mensaje || 'Respuesta inválida'}`);
+        alert(`Error al guardar: ${resultado.mensaje || 'Respuesta inválida'}`);
       }
     } catch (error) {
-      console.error('❌ Error de red al guardar la apuesta:', error);
-      alert('❌ Error al conectar con el servidor backend.');
+      console.error('Error de red al guardar la apuesta:', error);
+      alert('Error al conectar con el servidor backend.');
     }
   };
 
@@ -225,7 +225,8 @@ function CalendarioApuestas({ torneoId }) {
               day: 'numeric', 
               month: 'long', 
               hour: '2-digit', 
-              minute: '2-digit'
+              minute: '2-digit',
+              timeZone: 'UTC'
             });
 
             return (
@@ -331,9 +332,9 @@ function CalendarioApuestas({ torneoId }) {
                   />
                   <span className="nombre-pais-drawer">{partidoSeleccionado.nombre_visitante}</span>
                   <div className="avatar-bandera-gigante">
-                    <img src={partidoSeleccionado.bandera_visitante || '/src/assets/banderas/default.png'} 
+                    <img src={partidoSeleccionado.bandera_visitante || './src/assets/banderas/default.png'} 
                     alt={partidoSeleccionado.nombre_visitante} 
-                    onError={(e) => { e.target.src = '/src/assets/banderas/default.png'; }} />
+                    onError={(e) => { e.target.src = './src/assets/banderas/default.png'; }} />
                   </div>
                 </div>
 
