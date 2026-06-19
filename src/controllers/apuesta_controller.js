@@ -17,7 +17,7 @@ export const registrarApuesta = async (req, res) => {
       return res.status(444).json({ ok: false, mensaje: 'El partido seleccionado no existe.' });
     }
 
-    // 2. CONTROL DE TIEMPO INTELIGENTE
+    // 2. CONTROL DE TIEMPO INTELIGENTE (Sincronizado con Hora Colombia)
     let momentoPartido;
 
     if (partidoReal.fecha_hora) {
@@ -35,16 +35,15 @@ export const registrarApuesta = async (req, res) => {
       momentoPartido = new Date(`${fechaISO}T${horaTexto}`);
     }
 
-    const momentoActual = new Date();
+    // 🇨🇴 OBTENER LA HORA ACTUAL EN ZONA HORARIA DE COLOMBIA
+    const ahoraUTC = new Date();
+    // Convertimos la hora del servidor al string local de Colombia y lo volvemos a hacer objeto Date
+    const momentoActualColombia = new Date(ahoraUTC.toLocaleString("en-US", { timeZone: "America/Bogota" }));
 
-    // ⏱️ CALCULAMOS LA DIFERENCIA EN MINUTOS REALES (En lugar de horas)
-    // Al restar dos objetos Date obtenemos milisegundos. 
-    // Dividimos por (1000 * 60) para pasarlo a minutos limpios.
-    const diferenciaMinutos = (momentoPartido - momentoActual) / (1000 * 60);
+    // Ahora restamos la hora del partido (que está en formato militar plano) menos la hora real de Colombia
+    const diferenciaMinutos = (momentoPartido - momentoActualColombia) / (1000 * 60);
 
-    // 🚨 NUEVA REGLA DE NEGOCIO: 
-    // Caso A: Si faltan menos de 30 minutos (diferenciaMinutos < 30) se bloquea.
-    // Caso B: Si el partido ya empezó o terminó, la diferencia será 0 o un número negativo (diferenciaMinutos <= 0), por lo que también entra en esta condición y se bloquea por completo.
+    // 🚨 REGLA DE NEGOCIO REVISADA
     if (diferenciaMinutos < 30) {
       return res.status(400).json({
         ok: false,
