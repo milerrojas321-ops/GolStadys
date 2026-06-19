@@ -226,7 +226,7 @@ function CalendarioApuestas({ torneoId }) {
               month: 'long', 
               hour: '2-digit', 
               minute: '2-digit',
-              timeZone: 'UTC'
+              timeZone: 'UTC-5'
             });
 
             return (
@@ -332,9 +332,9 @@ function CalendarioApuestas({ torneoId }) {
                   />
                   <span className="nombre-pais-drawer">{partidoSeleccionado.nombre_visitante}</span>
                   <div className="avatar-bandera-gigante">
-                    <img src={partidoSeleccionado.bandera_visitante || './src/assets/banderas/default.png'} 
+                    <img src={partidoSeleccionado.bandera_visitante || '/src/assets/banderas/default.png'} 
                     alt={partidoSeleccionado.nombre_visitante} 
-                    onError={(e) => { e.target.src = './src/assets/banderas/default.png'; }} />
+                    onError={(e) => { e.target.src = '/src/assets/banderas/default.png'; }} />
                   </div>
                 </div>
 
