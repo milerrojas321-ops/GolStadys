@@ -17,14 +17,12 @@ export const registrarApuesta = async (req, res) => {
       return res.status(444).json({ ok: false, mensaje: 'El partido seleccionado no existe.' });
     }
 
-    // 2. CONTROL DE TIEMPO INTELIGENTE (Para columnas combinadas como fecha_hora o individuales)
+    // 2. CONTROL DE TIEMPO INTELIGENTE
     let momentoPartido;
 
     if (partidoReal.fecha_hora) {
-      // Si usas un campo DATETIME/TIMESTAMP único en MySQL
       momentoPartido = new Date(partidoReal.fecha_hora);
     } else {
-      // Por si acaso maneja campos separados (fecha y hora)
       const fechaCruda = partidoReal.fecha_partido || partidoReal.fecha;
       const horaCruda = partidoReal.hora_partido || partidoReal.hora;
 
@@ -39,14 +37,18 @@ export const registrarApuesta = async (req, res) => {
 
     const momentoActual = new Date();
 
-    // Calcular la diferencia exacta expresada en horas reales
-    const diferenciaHoras = (momentoPartido - momentoActual) / (1000 * 60 * 60);
+    // ⏱️ CALCULAMOS LA DIFERENCIA EN MINUTOS REALES (En lugar de horas)
+    // Al restar dos objetos Date obtenemos milisegundos. 
+    // Dividimos por (1000 * 60) para pasarlo a minutos limpios.
+    const diferenciaMinutos = (momentoPartido - momentoActual) / (1000 * 60);
 
-    //  REGLA DE NEGOCIO: Bloqueo a menos de 1 hora del partido
-    if (diferenciaHoras < 1) {
+    // 🚨 NUEVA REGLA DE NEGOCIO: 
+    // Caso A: Si faltan menos de 30 minutos (diferenciaMinutos < 30) se bloquea.
+    // Caso B: Si el partido ya empezó o terminó, la diferencia será 0 o un número negativo (diferenciaMinutos <= 0), por lo que también entra en esta condición y se bloquea por completo.
+    if (diferenciaMinutos < 30) {
       return res.status(400).json({
         ok: false,
-        mensaje: 'Pronóstico bloqueado. No puedes fijar o editar marcadores a menos de 1 hora del partido.'
+        mensaje: 'Pronóstico bloqueado. No puedes fijar o editar marcadores a menos de 30 minutos del partido o si este ya comenzó.'
       });
     }
 
