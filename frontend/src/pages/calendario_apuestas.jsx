@@ -11,7 +11,33 @@ function CalendarioApuestas({ torneoId }) {
   const [partidos, setPartidos] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // Cargar partidos del backend
+  // Función reutilizable para extraer el ID de usuario de forma segura
+  const obtenerIdUsuarioSeguro = () => {
+    const tokenGolstadys = localStorage.getItem('token_golstadys');
+    if (!tokenGolstadys) return null;
+
+    try {
+      // Caso 1: Si es un objeto JSON (como tu sesión actual)
+      if (tokenGolstadys.startsWith('{')) {
+        const objetoUsuario = JSON.parse(tokenGolstadys);
+        return parseInt(objetoUsuario.id_usuario, 10);
+      } 
+      // Caso 2: Formato viejo con guiones bajos (ej: USER_ID_4)
+      const partes = tokenGolstadys.split('_');
+      if (partes.length >= 3) {
+        return parseInt(partes[2], 10);
+      } else if (partes.length === 2) {
+        return parseInt(partes[1], 10);
+      }
+      // Caso 3: ID plano numérico
+      const IDPlano = parseInt(tokenGolstadys, 10);
+      return isNaN(IDPlano) ? null : IDPlano;
+    } catch (error) {
+      console.error("❌ Error al procesar el token_golstadys:", error);
+      return null;
+    }
+  };
+
   // Cargar partidos del backend y cruzarlos con las apuestas existentes del usuario
   useEffect(() => {
     const cargarPartidosYApuestas = async () => {
@@ -22,16 +48,8 @@ function CalendarioApuestas({ torneoId }) {
         const respuestaPartidos = await fetch(`https://golstadys-production.up.railway.app/api/partidos/${torneoId}`);
         const datosPartidos = await respuestaPartidos.json();
 
-        // 2. Extraer el ID del usuario actual desde su token_golstadys
-        const tokenGolstadys = localStorage.getItem('token_golstadys');
-        let idUsuarioReal = null;
-
-        if (tokenGolstadys) {
-          const partes = tokenGolstadys.split('_');
-          if (partes.length >= 3) {
-            idUsuarioReal = parseInt(partes[2], 10);
-          }
-        }
+        // 2. Extraer el ID del usuario actual de forma segura
+        const idUsuarioReal = obtenerIdUsuarioSeguro();
 
         // 3. Si hay un usuario logueado, consultar si tiene apuestas registradas en la BD
         let apuestasUsuario = [];
@@ -46,23 +64,30 @@ function CalendarioApuestas({ torneoId }) {
           }
         }
 
-        // 4. 🔥 CRUCE MÁGICO DE DATOS: Fusionar el fixture con las apuestas reales de la BD
+        // 4. 🔥 CRUCE DE DATOS: Inicializar inputs y prevenir duplicidad visual
+        const mapaInicialPredicciones = {};
+
         const partidosCruzados = datosPartidos.map((partido) => {
-          // Buscamos si el usuario ya apostó en este partido
           const apuestaEncontrada = apuestasUsuario.find(a => a.id_partido === partido.id_partido);
 
           if (apuestaEncontrada) {
+            // Sincronizamos el mapa de inputs del estado global
+            mapaInicialPredicciones[partido.id_partido] = {
+              local: apuestaEncontrada.prediccion_goles_local.toString(),
+              visitante: apuestaEncontrada.prediccion_goles_visitante.toString()
+            };
+
             return {
               ...partido,
-              estado_partido: 'pronosticado', // Activa visualmente el modo "completado / editar"
-              goles_local_real: apuestaEncontrada.prediccion_goles_local,     // Pinta sus goles guardados
-              goles_visitante_real: apuestaEncontrada.prediccion_goles_visitante // Pinta sus goles guardados
+              estado_partido: 'pronosticado', 
+              goles_local_real: apuestaEncontrada.prediccion_goles_local,     
+              goles_visitante_real: apuestaEncontrada.prediccion_goles_visitante 
             };
           }
-          return partido; // Si no ha apostado, se deja el partido intacto ("Apostar!!!")
+          return partido; 
         });
 
-        // Guardamos todo el fixture procesado en el estado
+        setPredicciones(mapaInicialPredicciones);
         setPartidos(partidosCruzados);
         setCargando(false);
       } catch (error) {
@@ -79,13 +104,11 @@ function CalendarioApuestas({ torneoId }) {
   const abrirPanelApuesta = (partido) => {
     setPartidoSeleccionado(partido);
 
-    // Si el partido ya tiene goles_local_real guardados del cruce de datos de la BD,
-    // los precargamos en los inputs para que puedas editarlos cómodamente.
     setPredicciones(prev => ({
       ...prev,
       [partido.id_partido]: {
-        local: partido.goles_local_real !== undefined ? partido.goles_local_real : '',
-        visitante: partido.goles_visitante_real !== undefined ? partido.goles_visitante_real : ''
+        local: partido.goles_local_real !== undefined ? partido.goles_local_real.toString() : '',
+        visitante: partido.goles_visitante_real !== undefined ? partido.goles_visitante_real.toString() : ''
       }
     }));
   };
@@ -109,31 +132,12 @@ function CalendarioApuestas({ torneoId }) {
       return;
     }
 
-    // 1. Capturamos tu token real estructurado de la consola ('token_sesion_ID_rol')
-    const tokenGolstadys = localStorage.getItem('token_golstadys');
+    // Extraer ID con nuestro validador inteligente para evitar el envío de nulos
+    const idUsuarioReal = obtenerIdUsuarioSeguro();
 
-    if (!tokenGolstadys) {
-      alert('Error: Sesión inválida o expirada. Por favor, vuelve a iniciar sesión en GolStadys.');
-      return;
-    }
-
-    let idUsuarioReal = null;
-
-    try {
-      // 2. EXTRAER EL ID DINÁMICO DESDE EL STRING DEL TOKEN
-      // Si el string es "token_sesion_2_jugador", al dividirlo por '_' obtenemos:
-      // partes[0] = "token", partes[1] = "sesion", partes[2] = "2", partes[3] = "jugador"
-      const partes = tokenGolstadys.split('_');
-      if (partes.length >= 3) {
-        idUsuarioReal = parseInt(partes[2], 10); // Tomamos la posición index 2 que es el ID numérico
-      }
-    } catch (e) {
-      console.error("Error al procesar el token de GolStadys:", e);
-    }
-
-    // Validación por si el string del token llega a estar corrupto o vacío
     if (!idUsuarioReal || isNaN(idUsuarioReal)) {
-      alert('Error: No se pudo descifrar tu ID de jugador. Cierra sesión y vuelve a entrar.');
+      alert('Error: Tu sesión ha expirado o es inválida. Cierra sesión y vuelve a entrar a GolStadys.');
+      console.error("❌ Error: id_usuario inválido en localStorage.");
       return;
     }
 
@@ -147,9 +151,8 @@ function CalendarioApuestas({ torneoId }) {
       tendenciaCalculada = 'V';
     }
 
-    // 3. Reestructuramos el JSON tal cual como lo espera recibir tu 'apuesta_controller.js'
     const datosApuesta = {
-      id_usuario: idUsuarioReal, // Envía el ID exacto del usuario logueado (ej: 2)
+      id_usuario: idUsuarioReal, 
       id_partido: partido.id_partido,
       prediccion_goles_local: numGolesLocal,
       prediccion_goles_visitante: numGolesVisitante,
@@ -168,8 +171,9 @@ function CalendarioApuestas({ torneoId }) {
       const resultado = await respuesta.json();
 
       if (respuesta.ok) {
-        console.log(`✅ Apuesta guardada exitosamente para el id_usuario: ${idUsuarioReal}`);
+        console.log(`✅ Apuesta procesada con éxito para el id_usuario: ${idUsuarioReal}`);
 
+        // Modificar localmente el estado del partido en la lista sin duplicar la tarjeta
         setPartidos(prevPartidos => 
           prevPartidos.map(p => 
             p.id_partido === partido.id_partido 
@@ -198,8 +202,6 @@ function CalendarioApuestas({ torneoId }) {
 
   return (
     <div className="contenedor-calendario-apuestas animacion-entrada-suave">
-
-      {/* PESTAÑAS DE NAVEGACIÓN */}
       <div className="cronograma-fechas-nav">
         {[1, 2, 3].map((numFecha) => (
           <button
@@ -213,13 +215,10 @@ function CalendarioApuestas({ torneoId }) {
         ))}
       </div>
 
-      {/* LISTADO DE PARTIDOS EN VIVO DESDE MYSQL */}
       <div className="lista-encuentros-fixture-scroll">
         {partidos.length > 0 ? (
           partidos.map((partido) => {
             const yaPronosticado = partido.estado_partido === 'pronosticado';
-
-            // Formateador premium para la fecha de MySQL
             const fechaFormateada = new Date(partido.fecha_hora).toLocaleDateString('es-ES', {
               weekday: 'long', 
               day: 'numeric', 
@@ -239,7 +238,6 @@ function CalendarioApuestas({ torneoId }) {
                 </div>
 
                 <div className="bloque-enfrentamiento-marcador">
-                  {/* Equipo Local */}
                   <div className="bando-equipo-compacto local">
                     <span className="nombre-pais-estadio">{partido.nombre_local}</span>
                     <div className="contenedor-bandera-compacta">
@@ -252,21 +250,18 @@ function CalendarioApuestas({ torneoId }) {
                     </div>
                   </div>
 
-                  {/* Marcador Preview */}
                   <div className="zona-marcador-preview">
                     <span className="marcador-num">{yaPronosticado ? partido.goles_local_real : '-'}</span>
                     <div className="separador-vs-compacto">VS</div>
                     <span className="marcador-num">{yaPronosticado ? partido.goles_visitante_real : '-'}</span>
                   </div>
 
-                  {/* Equipo Visitante */}
                   <div className="bando-equipo-compacto visitante">
                     <div className="contenedor-bandera-compacta">
                       <img 
                         src={partido.bandera_visitante || '/src/assets/banderas/default.png'} 
                         alt={partido.nombre_visitante} 
                         className="imagen-bandera-redonda" 
-                        // Cambia las líneas del onError para que apunten a un archivo de verdad:
                         onError={(e) => { e.target.src = '/src/assets/banderas/default.png'; }}
                       />
                     </div>
@@ -289,7 +284,6 @@ function CalendarioApuestas({ torneoId }) {
         )}
       </div>
 
-      {/* PORTAL AL BODY PARA EL MODAL */}
       {partidoSeleccionado && createPortal(
         <div className="drawer-overlay-backdrop" onClick={cerrarPanelApuesta}>
           <div className="drawer-lateral-premium-panel" onClick={(e) => e.stopPropagation()}>
@@ -299,8 +293,6 @@ function CalendarioApuestas({ torneoId }) {
             </div>
             <div className="drawer-body-info">
               <div className="caja-formulario-apuesta-drawer">
-
-                {/* Modal Local */}
                 <div className="bando-drawer-interactive local">
                   <div className="avatar-bandera-gigante">
                     <img src={partidoSeleccionado.bandera_local || '/src/assets/banderas/default.png'} 
@@ -320,7 +312,6 @@ function CalendarioApuestas({ torneoId }) {
 
                 <div className="vs-intermedio-drawer">VS</div>
 
-                {/* Modal Visitante */}
                 <div className="bando-drawer-interactive visitante">
                   <input
                     type="text"
@@ -337,7 +328,6 @@ function CalendarioApuestas({ torneoId }) {
                     onError={(e) => { e.target.src = '/src/assets/banderas/default.png'; }} />
                   </div>
                 </div>
-
               </div>
             </div>
             <div className="drawer-footer-actions">
@@ -350,7 +340,6 @@ function CalendarioApuestas({ torneoId }) {
         </div>,
         document.body
       )}
-
     </div>
   );
 }
