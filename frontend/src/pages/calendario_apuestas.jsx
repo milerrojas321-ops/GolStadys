@@ -6,7 +6,7 @@ function CalendarioApuestas({ torneoId }) {
   const [jornadaActiva, setJornadaActiva] = useState(1);
   const [partidoSeleccionado, setPartidoSeleccionado] = useState(null);
   const [predicciones, setPredicciones] = useState({});
-  
+
   // Estados para datos de la base de datos
   const [partidos, setPartidos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -78,7 +78,7 @@ function CalendarioApuestas({ torneoId }) {
 
   const abrirPanelApuesta = (partido) => {
     setPartidoSeleccionado(partido);
-    
+
     // Si el partido ya tiene goles_local_real guardados del cruce de datos de la BD,
     // los precargamos en los inputs para que puedas editarlos cómodamente.
     setPredicciones(prev => ({
@@ -101,80 +101,90 @@ function CalendarioApuestas({ torneoId }) {
   };
 
   const guardarCambiosApuesta = async (partido) => {
-    const golesLocal = parseInt(predicciones[partido.id_partido]?.local, 10);
-    const golesVisitante = parseInt(predicciones[partido.id_partido]?.visitante, 10);
+    const golesLocal = predicciones[partido.id_partido]?.local;
+    const golesVisitante = predicciones[partido.id_partido]?.visitante;
 
-    if (isNaN(golesLocal) || isNaN(golesVisitante)) {
-      alert("Por favor ingresa un marcador válido.");
+    if (golesLocal === undefined || golesLocal === '' || golesVisitante === undefined || golesVisitante === '') {
+      alert('⚠️ Por favor, ingresa los goles para ambos equipos antes de fijar el marcador.');
       return;
     }
 
-    // 🕵️‍♂️ PROCESADOR INTELIGENTE DE USUARIO
+    // 1. Capturamos tu token real estructurado de la consola ('token_sesion_ID_rol')
     const tokenGolstadys = localStorage.getItem('token_golstadys');
+
+    if (!tokenGolstadys) {
+      alert('❌ Error: Sesión inválida o expirada. Por favor, vuelve a iniciar sesión en GolStadys.');
+      return;
+    }
+
     let idUsuarioReal = null;
 
-    if (tokenGolstadys) {
-      try {
-        // Caso 1: Si es un objeto de texto JSON (como el tuyo que empieza con '{')
-        if (tokenGolstadys.startsWith('{')) {
-          const objetoUsuario = JSON.parse(tokenGolstadys);
-          idUsuarioReal = parseInt(objetoUsuario.id_usuario, 10);
-        } 
-        // Caso 2: Por si acaso quedan tokens viejos con guion bajo (ej: USER_4)
-        else if (tokenGolstadys.includes('_')) {
-          idUsuarioReal = parseInt(tokenGolstadys.split('_')[1], 10);
-        } 
-        // Caso 3: Si es solo el número del ID limpio suelto (ej: 4)
-        else {
-          idUsuarioReal = parseInt(tokenGolstadys, 10);
-        }
-      } catch (errorJson) {
-        console.error("Error al procesar el token de sesión:", errorJson);
+    try {
+      // 2. EXTRAER EL ID DINÁMICO DESDE EL STRING DEL TOKEN
+      // Si el string es "token_sesion_2_jugador", al dividirlo por '_' obtenemos:
+      // partes[0] = "token", partes[1] = "sesion", partes[2] = "2", partes[3] = "jugador"
+      const partes = tokenGolstadys.split('_');
+      if (partes.length >= 3) {
+        idUsuarioReal = parseInt(partes[2], 10); // Tomamos la posición index 2 que es el ID numérico
       }
+    } catch (e) {
+      console.error("Error al procesar el token de GolStadys:", e);
     }
 
-    // 🚨 CONTROL DE SEGURIDAD INTERNO
+    // Validación por si el string del token llega a estar corrupto o vacío
     if (!idUsuarioReal || isNaN(idUsuarioReal)) {
-      alert("Tu sesión ha expirado o no es válida. Por favor, vuelve a iniciar sesión.");
-      console.error("❌ Error: No se pudo obtener un id_usuario numérico válido.");
+      alert('❌ Error: No se pudo descifrar tu ID de jugador. Cierra sesión y vuelve a entrar.');
       return;
     }
 
-    // Calculamos la tendencia para enviársela limpia a la base de datos
-    let tendencia = 'E';
-    if (golesLocal > golesVisitante) tendencia = 'L';
-    if (golesLocal < golesVisitante) tendencia = 'V';
+    const numGolesLocal = parseInt(golesLocal, 10);
+    const numGolesVisitante = parseInt(golesVisitante, 10);
 
-    const payload = {
-      id_usuario: idUsuarioReal, // Mandará el número 4 limpio sin romper el backend
+    let tendenciaCalculada = 'E';
+    if (numGolesLocal > numGolesVisitante) {
+      tendenciaCalculada = 'L';
+    } else if (numGolesLocal < numGolesVisitante) {
+      tendenciaCalculada = 'V';
+    }
+
+    // 3. Reestructuramos el JSON tal cual como lo espera recibir tu 'apuesta_controller.js'
+    const datosApuesta = {
+      id_usuario: idUsuarioReal, // Envía el ID exacto del usuario logueado (ej: 2)
       id_partido: partido.id_partido,
-      prediccion_goles_local: golesLocal,
-      prediccion_goles_visitante: golesVisitante,
-      tendencia_predicha: tendencia
+      prediccion_goles_local: numGolesLocal,
+      prediccion_goles_visitante: numGolesVisitante,
+      tendencia_predicha: tendenciaCalculada
     };
 
     try {
       const respuesta = await fetch('https://golstadys-production.up.railway.app/api/apuestas', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datosApuesta),
       });
-      
-      const datos = await respuesta.json();
+
+      const resultado = await respuesta.json();
+
       if (respuesta.ok) {
-        alert("¡Tu pronóstico ha sido fijado con éxito!");
+        console.log(`✅ Apuesta guardada exitosamente para el id_usuario: ${idUsuarioReal}`);
+
+        setPartidos(prevPartidos => 
+          prevPartidos.map(p => 
+            p.id_partido === partido.id_partido 
+              ? { ...p, estado_partido: 'pronosticado', goles_local_real: numGolesLocal, goles_visitante_real: numGolesVisitante } 
+              : p
+          )
+        );
+
         cerrarPanelApuesta();
-        
-        // Si tienes la función de recarga, actualiza el fixture en tiempo real
-        if (typeof cargarPartidosYApuestas === 'function') {
-          cargarPartidosYApuestas();
-        }
       } else {
-        alert(`Error en el servidor: ${datos.mensaje}`);
+        alert(`❌ Error al guardar: ${resultado.mensaje || 'Respuesta inválida'}`);
       }
     } catch (error) {
-      console.error("Error de red al guardar apuesta:", error);
-      alert("No se pudo conectar con el servidor de GolStadys.");
+      console.error('❌ Error de red al guardar la apuesta:', error);
+      alert('❌ Error al conectar con el servidor backend.');
     }
   };
 
@@ -188,7 +198,7 @@ function CalendarioApuestas({ torneoId }) {
 
   return (
     <div className="contenedor-calendario-apuestas animacion-entrada-suave">
-      
+
       {/* PESTAÑAS DE NAVEGACIÓN */}
       <div className="cronograma-fechas-nav">
         {[1, 2, 3].map((numFecha) => (
@@ -288,7 +298,7 @@ function CalendarioApuestas({ torneoId }) {
             </div>
             <div className="drawer-body-info">
               <div className="caja-formulario-apuesta-drawer">
-                
+
                 {/* Modal Local */}
                 <div className="bando-drawer-interactive local">
                   <div className="avatar-bandera-gigante">
