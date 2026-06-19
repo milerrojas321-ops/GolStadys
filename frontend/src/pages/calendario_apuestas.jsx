@@ -226,7 +226,7 @@ function CalendarioApuestas({ torneoId }) {
               month: 'long', 
               hour: '2-digit', 
               minute: '2-digit',
-              timeZone: 'UTC-5'
+              timeZone: 'UTC'
             });
 
             return (
