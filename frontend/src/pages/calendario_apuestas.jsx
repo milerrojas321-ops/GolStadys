@@ -102,16 +102,25 @@ function CalendarioApuestas({ torneoId }) {
   }, [torneoId]);
 
   const abrirPanelApuesta = (partido) => {
-    setPartidoSeleccionado(partido);
+  setPartidoSeleccionado(partido);
 
-    setPredicciones(prev => ({
-      ...prev,
-      [partido.id_partido]: {
-        local: partido.goles_local_real !== undefined ? partido.goles_local_real.toString() : '',
-        visitante: partido.goles_visitante_real !== undefined ? partido.goles_visitante_real.toString() : ''
-      }
-    }));
-  };
+  // Si no es undefined ni tampoco es null, lo hacemos texto de forma segura. Si es null, ponemos un campo vacío ''
+  const golesLocalSeguros = partido.goles_local_real !== undefined && partido.goles_local_real !== null 
+    ? partido.goles_local_real.toString() 
+    : '';
+
+  const golesVisitanteSeguros = partido.goles_visitante_real !== undefined && partido.goles_visitante_real !== null 
+    ? partido.goles_visitante_real.toString() 
+    : '';
+
+  setPredicciones(prev => ({
+    ...prev,
+    [partido.id_partido]: {
+      local: golesLocalSeguros,
+      visitante: golesVisitanteSeguros
+    }
+  }));
+};
 
   const cerrarPanelApuesta = () => setPartidoSeleccionado(null);
 
@@ -171,7 +180,7 @@ function CalendarioApuestas({ torneoId }) {
       const resultado = await respuesta.json();
 
       if (respuesta.ok) {
-        console.log(`✅ Apuesta procesada con éxito para el id_usuario: ${idUsuarioReal}`);
+        console.log(`Apuesta procesada con éxito para el id_usuario: ${idUsuarioReal}`);
 
         // Modificar localmente el estado del partido en la lista sin duplicar la tarjeta
         setPartidos(prevPartidos => 
@@ -232,7 +241,7 @@ function CalendarioApuestas({ torneoId }) {
               <div key={partido.id_partido} className={`tarjeta-partido-fixture ${yaPronosticado ? 'tarjeta-completada' : ''}`}>
                 <div className="partido-meta-top">
                   <span className="badge-fecha-hora" style={{ textTransform: 'capitalize' }}>
-                    📅 {fechaFormateada}
+                    {fechaFormateada}
                   </span>
                   <span className="badge-estadio">🏟️ Estadio Oficial</span>
                 </div>
@@ -271,7 +280,7 @@ function CalendarioApuestas({ torneoId }) {
 
                 <div className="partido-acciones-footer">
                   <button className="boton-registrar-apuesta-neon" onClick={() => abrirPanelApuesta(partido)}>
-                    {yaPronosticado ? '🔄 Editar Pronóstico' : 'Apostar!!!'}
+                    {yaPronosticado ? 'Editar Pronóstico' : 'Apostar!!!'}
                   </button>
                 </div>
               </div>
@@ -279,7 +288,7 @@ function CalendarioApuestas({ torneoId }) {
           })
         ) : (
           <div className="vista-modulo-vacio-calendario" style={{ marginTop: '20px', color: '#718096' }}>
-            ⚙️ No hay partidos cargados para este torneo en la base de datos.
+            No hay partidos cargados para este torneo en la base de datos.
           </div>
         )}
       </div>
@@ -288,7 +297,7 @@ function CalendarioApuestas({ torneoId }) {
         <div className="drawer-overlay-backdrop" onClick={cerrarPanelApuesta}>
           <div className="drawer-lateral-premium-panel" onClick={(e) => e.stopPropagation()}>
             <div className="drawer-header-top">
-              <h3>🎯 Registrar Pronóstico</h3>
+              <h3>Registrar Pronóstico</h3>
               <button className="boton-cerrar-drawer-x" onClick={cerrarPanelApuesta}>&times;</button>
             </div>
             <div className="drawer-body-info">
