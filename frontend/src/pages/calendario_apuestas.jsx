@@ -279,9 +279,9 @@ function CalendarioApuestas({ torneoId }) {
                 </div>
 
                 <div className="partido-acciones-footer">
-                  {/*VALIDACIÓN DE CIERRE: Si el partido ya tiene marcador oficial, se bloquea por completo */}
-                  {partido.goles_local !== null && partido.goles_visitante !== null ? (
-                    <button className="boton-registrar-apuesta-neon" disabled style={{ opacity: 0.5, cursor: 'not-allowed', background: '#334155', boxShadow: 'none' }}>
+                  {/*Si el partido ya cuenta con un resultado oficial numérico real en la BD, se bloquea */}
+                  {typeof partido.goles_local === 'number' && typeof partido.goles_visitante === 'number' ? (
+                    <button className="boton-registrar-apuesta-neon" disabled style={{ opacity: 0.6, cursor: 'not-allowed', background: '#2d3748', boxShadow: 'none' }}>
                       Partido Finalizado
                     </button>
                   ) : (

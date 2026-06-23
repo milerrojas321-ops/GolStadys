@@ -1,7 +1,6 @@
 import Apuesta from '../models/apuesta.js';
 
 export const registrarApuesta = async (req, res) => {
-  
   const { 
     id_usuario, 
     id_partido, 
@@ -18,6 +17,14 @@ export const registrarApuesta = async (req, res) => {
       return res.status(444).json({ ok: false, mensaje: 'El partido seleccionado no existe.' });
     }
 
+    // 🔒 REGLA DE SEGURIDAD PRINCIPAL: Si ya tiene marcador oficial, se bloquea de inmediato
+    if (partidoReal.goles_local !== null && partidoReal.goles_visitante !== null) {
+      return res.status(403).json({ 
+        ok: false, 
+        mensaje: 'Lo sentimos, este partido ya finalizó y sus apuestas están cerradas.' 
+      });
+    }
+
     // 2. CONTROL DE TIEMPO INTELIGENTE (Sincronizado con Hora Colombia)
     let momentoPartido;
 
@@ -30,13 +37,6 @@ export const registrarApuesta = async (req, res) => {
       if (!fechaCruda || !horaCruda) {
         return res.status(500).json({ ok: false, mensaje: 'Error: No se encontraron las columnas de tiempo en la BD.' });
       }
-      
-      if (partidoReal.goles_local !== null && partidoReal.goles_visitante !== null) {
-      return res.status(403).json({ 
-        ok: false, 
-        mensaje: 'Lo sentimos, este partido ya finalizó y sus apuestas están cerradas.' 
-      });
-    }
 
       const fechaISO = new Date(fechaCruda).toISOString().split('T')[0]; 
       const horaTexto = typeof horaCruda === 'string' ? horaCruda : horaCruda.toString(); 
@@ -45,13 +45,12 @@ export const registrarApuesta = async (req, res) => {
 
     // 🇨🇴 OBTENER LA HORA ACTUAL EN ZONA HORARIA DE COLOMBIA
     const ahoraUTC = new Date();
-    // Convertimos la hora del servidor al string local de Colombia y lo volvemos a hacer objeto Date
     const momentoActualColombia = new Date(ahoraUTC.toLocaleString("en-US", { timeZone: "America/Bogota" }));
 
-    // Ahora restamos la hora del partido (que está en formato militar plano) menos la hora real de Colombia
+    // Calcular diferencia de tiempo
     const diferenciaMinutos = (momentoPartido - momentoActualColombia) / (1000 * 60);
 
-    // 🚨 REGLA DE NEGOCIO REVISADA
+    // 🚨 REGLA DE TIEMPO
     if (diferenciaMinutos < 30) {
       return res.status(400).json({
         ok: false,
@@ -59,7 +58,7 @@ export const registrarApuesta = async (req, res) => {
       });
     }
 
-    // 3. Guardar o Modificar a través del Modelo si pasa el filtro de tiempo
+    // 3. Guardar o Modificar a través del Modelo si pasa los filtros
     await Apuesta.upsert({
       id_usuario,
       id_partido,
