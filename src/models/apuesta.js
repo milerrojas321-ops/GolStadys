@@ -77,7 +77,7 @@ const Apuesta = {
         return rows;
     },
 
-    // 🟢 NUEVO: Guardar los puntos de una apuesta y sumarlos de inmediato al total del usuario
+    // NUEVO: Guardar los puntos de una apuesta y sumarlos de inmediato al total del usuario
     aplicarPuntuacion: async (id_apuesta, id_usuario, puntos) => {
         const connection = await db.getConnection(); // Usamos transacción para que se hagan ambos updates o ninguno
         try {

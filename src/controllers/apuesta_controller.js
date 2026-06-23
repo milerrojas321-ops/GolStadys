@@ -1,6 +1,7 @@
 import Apuesta from '../models/apuesta.js';
 
 export const registrarApuesta = async (req, res) => {
+  
   const { 
     id_usuario, 
     id_partido, 
@@ -29,6 +30,13 @@ export const registrarApuesta = async (req, res) => {
       if (!fechaCruda || !horaCruda) {
         return res.status(500).json({ ok: false, mensaje: 'Error: No se encontraron las columnas de tiempo en la BD.' });
       }
+      
+      if (partidoReal.goles_local !== null && partidoReal.goles_visitante !== null) {
+      return res.status(403).json({ 
+        ok: false, 
+        mensaje: 'Lo sentimos, este partido ya finalizó y sus apuestas están cerradas.' 
+      });
+    }
 
       const fechaISO = new Date(fechaCruda).toISOString().split('T')[0]; 
       const horaTexto = typeof horaCruda === 'string' ? horaCruda : horaCruda.toString(); 

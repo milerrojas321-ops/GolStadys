@@ -279,9 +279,16 @@ function CalendarioApuestas({ torneoId }) {
                 </div>
 
                 <div className="partido-acciones-footer">
-                  <button className="boton-registrar-apuesta-neon" onClick={() => abrirPanelApuesta(partido)}>
-                    {yaPronosticado ? 'Editar Pronóstico' : 'Apostar!!!'}
-                  </button>
+                  {/*VALIDACIÓN DE CIERRE: Si el partido ya tiene marcador oficial, se bloquea por completo */}
+                  {partido.goles_local !== null && partido.goles_visitante !== null ? (
+                    <button className="boton-registrar-apuesta-neon" disabled style={{ opacity: 0.5, cursor: 'not-allowed', background: '#334155', boxShadow: 'none' }}>
+                      Partido Finalizado
+                    </button>
+                  ) : (
+                    <button className="boton-registrar-apuesta-neon" onClick={() => abrirPanelApuesta(partido)}>
+                      {yaPronosticado ? 'Editar Pronóstico' : 'Apostar!!!'}
+                    </button>
+                  )}
                 </div>
               </div>
             );
