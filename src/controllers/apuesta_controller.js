@@ -17,8 +17,9 @@ export const registrarApuesta = async (req, res) => {
       return res.status(444).json({ ok: false, mensaje: 'El partido seleccionado no existe.' });
     }
 
-    // 🔒 REGLA DE SEGURIDAD PRINCIPAL: Si ya tiene marcador oficial, se bloquea de inmediato
-    if (partidoReal.goles_local !== null && partidoReal.goles_visitante !== null) {
+    // 🔒 REGLA DE SEGURIDAD PRINCIPAL: Si ya tiene marcador oficial en la BD, rechazar de inmediato.
+    // Usamos != null para capturar tanto null como undefined de forma segura.
+    if (partidoReal.goles_local != null && partidoReal.goles_visitante != null) {
       return res.status(403).json({ 
         ok: false, 
         mensaje: 'Lo sentimos, este partido ya finalizó y sus apuestas están cerradas.' 
@@ -38,8 +39,9 @@ export const registrarApuesta = async (req, res) => {
         return res.status(500).json({ ok: false, mensaje: 'Error: No se encontraron las columnas de tiempo en la BD.' });
       }
 
+      // Procesamiento seguro de strings de fecha
       const fechaISO = new Date(fechaCruda).toISOString().split('T')[0]; 
-      const horaTexto = typeof horaCruda === 'string' ? horaCruda : horaCruda.toString(); 
+      const horaTexto = horaCruda != null ? horaCruda.toString() : "00:00:00"; 
       momentoPartido = new Date(`${fechaISO}T${horaTexto}`);
     }
 
@@ -47,10 +49,10 @@ export const registrarApuesta = async (req, res) => {
     const ahoraUTC = new Date();
     const momentoActualColombia = new Date(ahoraUTC.toLocaleString("en-US", { timeZone: "America/Bogota" }));
 
-    // Calcular diferencia de tiempo
+    // Ahora restamos el tiempo restante para iniciar el cotejo
     const diferenciaMinutos = (momentoPartido - momentoActualColombia) / (1000 * 60);
 
-    // 🚨 REGLA DE TIEMPO
+    // 🚨 REGLA DE NEGOCIO: Bloqueo por tiempo límite (30 minutos antes)
     if (diferenciaMinutos < 30) {
       return res.status(400).json({
         ok: false,
@@ -58,7 +60,7 @@ export const registrarApuesta = async (req, res) => {
       });
     }
 
-    // 3. Guardar o Modificar a través del Modelo si pasa los filtros
+    // 3. Guardar o Modificar a través del Modelo si pasa los filtros corporativos
     await Apuesta.upsert({
       id_usuario,
       id_partido,
