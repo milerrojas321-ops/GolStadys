@@ -17,12 +17,15 @@ export const registrarApuesta = async (req, res) => {
       return res.status(444).json({ ok: false, mensaje: 'El partido seleccionado no existe.' });
     }
 
-    // 🔒 REGLA DE SEGURIDAD PRINCIPAL: Si ya tiene marcador oficial en la BD, rechazar de inmediato.
-    // Usamos != null para capturar tanto null como undefined de forma segura.
-    if (partidoReal.goles_local != null && partidoReal.goles_visitante != null) {
+    // 🔒 REGLA DE SEGURIDAD PRINCIPAL CORREGIDA: 
+    // Evaluamos 'estado_partido' o las columnas reales con '_real' que usa tu BD
+    if (
+      partidoReal.estado_partido === 'finalizado' || 
+      (partidoReal.goles_local_real != null && partidoReal.goles_visitante_real != null)
+    ) {
       return res.status(403).json({ 
         ok: false, 
-        mensaje: 'Lo sentimos, este partido ya finalizó y sus apuestas están cerradas.' 
+        mensaje: 'Lo sentimos, este partido ya finalizó y sus apuestas están cerradas oficialmente.' 
       });
     }
 
