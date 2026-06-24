@@ -78,7 +78,7 @@ function AdminDashboard({ alCerrarSesion, usuarioGlobal }) {
   };
 
   const manejarCrearPartido = async () => {
-    // 🎯 Capturamos los datos asegurando que id_torneo no llegue vacío ni en String
+    //Capturamos los datos asegurando que id_torneo no llegue vacío ni en String
     const datosParaBackend = {
       id_torneo: parseInt(nuevoPartido.id_torneo, 10),
       id_local: parseInt(nuevoPartido.id_local, 10),
@@ -135,7 +135,7 @@ const manejarGuardarResultadoDirecto = async (idPartido) => {
     }
 
     try {
-      // 🎯 RUTA CORREGIDA: Cambiada para que coincida con router.post('/partidos/:id_partido/resultado')
+      //RUTA CORREGIDA: Cambiada para que coincida con router.post('/partidos/:id_partido/resultado')
       const urlCorrecta = `https://golstadys-production.up.railway.app/api/partidos/${idPartido}/resultado`;
 
       const respuesta = await fetch(urlCorrecta, {
