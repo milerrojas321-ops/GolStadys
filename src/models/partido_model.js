@@ -15,8 +15,8 @@ const Partido = {
         sv.nombre_seleccion AS nombre_visitante,
         sv.url_bandera AS bandera_visitante
       FROM partidos p
-      INNER JOIN selecciones sl ON p.id_local = sl.id_seleccion
-      INNER JOIN selecciones sv ON p.id_visitante = sv.id_seleccion
+      LEFT JOIN selecciones sl ON p.id_local = sl.id_seleccion
+      LEFT JOIN selecciones sv ON p.id_visitante = sv.id_seleccion
       WHERE p.id_torneo = ?
       ORDER BY p.fecha_hora ASC
     `;
@@ -38,8 +38,8 @@ const Partido = {
         sv.nombre_seleccion AS nombre_visitante,
         sv.url_bandera AS bandera_visitante
       FROM partidos p
-      INNER JOIN selecciones sl ON p.id_local = sl.id_seleccion
-      INNER JOIN selecciones sv ON p.id_visitante = sv.id_seleccion
+      LEFT JOIN selecciones sl ON p.id_local = sl.id_seleccion
+      LEFT JOIN selecciones sv ON p.id_visitante = sv.id_seleccion
       ORDER BY p.fecha_hora ASC;
     `;
     const [rows] = await db.query(querySQL);
