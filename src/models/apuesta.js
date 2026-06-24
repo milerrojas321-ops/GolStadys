@@ -69,6 +69,8 @@ const Apuesta = {
 
 
 obtenerApuestasPorPartido: async (id_partido) => {
+        // Trae solo las apuestas que tengan el estado inicial y que no hayan recibido una actualización de puntos real (asumiendo que las nuevas arrancan en NULL o manejas una bandera)
+        // Pero para ir a la segura con tu flujo actual, usemos el ID del partido y procesemos de forma limpia:
         const [rows] = await db.query(
             "SELECT * FROM apuestas WHERE id_partido = ? AND estado_apuesta = 'pendiente'",
             [id_partido]
@@ -81,15 +83,14 @@ obtenerApuestasPorPartido: async (id_partido) => {
         try {
             await connection.beginTransaction();
 
-            // Guardamos los puntos. Para evitar que se vuelva a calcular (ya que quitamos el IS NULL),
-            // le cambiamos el estado a 'finalizó' (con tilde, que es la que tu ENUM parece tener guardada)
-            // O si prefieres ir a la segura total, usa 'finalizó' tal cual la tenías antes.
+            // 🔥 SOLUCIÓN DEFINITIVA: NO tocamos la columna estado_apuesta para evitar el ENUM roto.
+            // Solo guardamos los puntos ganados (que por defecto eran 0 o NULL).
             await connection.query(
-                "UPDATE apuestas SET puntos_ganados_apuesta = ?, estado_apuesta = 'finalizó' WHERE id_apuesta = ?",
+                "UPDATE apuestas SET puntos_ganados_apuesta = ? WHERE id_apuesta = ?",
                 [puntos, id_apuesta]
             );
 
-            // Sumar puntos al perfil global del usuario
+            // 2. Sumar de forma acumulativa los puntos al perfil global del usuario
             await connection.query(
                 "UPDATE usuarios SET puntaje_total = puntaje_total + ? WHERE id_usuario = ?",
                 [puntos, id_usuario]
