@@ -223,7 +223,9 @@ const manejarGuardarResultadoDirecto = async (idPartido) => {
                   >
                     <option value="">Selecciona un torneo...</option>
                     {torneos.map(t => (
-                      <option key={t.id_torneo} value={t.id_torneo}>{t.nombre_torneo || `Torneo #${t.id_torneo}`}</option>
+                      <option key={t.id} value={t.id}>
+                        {t.nombre || `Torneo #${t.id}`}
+                      </option>
                     ))}
                   </select>
                 </div>
