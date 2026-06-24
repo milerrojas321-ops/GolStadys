@@ -103,12 +103,20 @@ export const obtenerApuestasUsuario = async (req, res) => {
 };
 
 export const calcularPuntosPartidos = async (req, res) => {
+
+
+  console.log("=== 🚨 DETECTANDO ENTRADA AL MOTOR DE PUNTOS 🚨 ===");
+  console.log("Contenido de req.body:", JSON.stringify(req.body));
+  console.log("Contenido de req.params:", JSON.stringify(req.params));
   // 🔥 SOLUCIÓN EXTRACCIÓN: Busca el ID tanto en los parámetros de la URL como en el cuerpo de la petición
   const id_partido = req.body?.id_partido || req.params?.id_partido || req.params?.idPartido;
   
   // Captura flexible para los goles reales ingresados
   const goles_local = req.body?.goles_local !== undefined ? req.body.goles_local : req.body?.goles_local_real;
   const goles_visitante = req.body?.goles_visitante !== undefined ? req.body.goles_visitante : req.body?.goles_visitante_real;
+
+
+  console.log(`Variables extraídas -> id_partido: ${id_partido}, goles_local: ${goles_local}, goles_visitante: ${goles_visitante}`);
 
   try {
     if (!id_partido) {
