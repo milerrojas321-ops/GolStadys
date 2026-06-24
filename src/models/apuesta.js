@@ -68,23 +68,22 @@ const Apuesta = {
     },
 
 
-// NUEVO: Traer todas las apuestas de un partido específico para procesarlas
-    obtenerApuestasPorPartido: async (id_partido) => {
+obtenerApuestasPorPartido: async (id_partido) => {
         const [rows] = await db.query(
-            "SELECT * FROM apuestas WHERE id_partido = ? AND estado_apuesta = 'pendiente'",
+            "SELECT * FROM apuestas WHERE id_partido = ? AND estado_apuesta = 'pendiente' AND puntos_ganados_apuesta IS NULL",
             [id_partido]
         );
         return rows;
     },
 
     aplicarPuntuacion: async (id_apuesta, id_usuario, puntos) => {
-        const connection = await db.getConnection(); // Usamos transacción para que se hagan ambos updates o ninguno
+        const connection = await db.getConnection(); 
         try {
             await connection.beginTransaction();
 
-            // 1. Actualizar el estado (usando 'finalizado') y los puntos de esta apuesta individual
+            // 1. Guardamos los puntos manteniendo el estado seguro 'pendiente'
             await connection.query(
-                "UPDATE apuestas SET puntos_ganados_apuesta = ?, estado_apuesta = 'hecho' WHERE id_apuesta = ?",
+                "UPDATE apuestas SET puntos_ganados_apuesta = ?, estado_apuesta = 'pendiente' WHERE id_apuesta = ?",
                 [puntos, id_apuesta]
             );
 
