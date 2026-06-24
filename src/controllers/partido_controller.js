@@ -57,7 +57,7 @@ export const obtenerTodasLasSelecciones = async (req, res) => {
 };
 
 export const registrarMarcadorOficial = async (req, res) => {
-  // Captura múltiple por si el parámetro viene de diferentes formas en la petición
+  // Captura el ID del partido desde los parámetros de la URL de forma segura
   const id_partido = req.params.id_partido || req.params.idPartido || req.body.id_partido;
   const { goles_local, goles_visitante } = req.body;
 
@@ -70,12 +70,13 @@ export const registrarMarcadorOficial = async (req, res) => {
     const gLocalInt = parseInt(goles_local, 10);
     const gVisitanteInt = parseInt(goles_visitante, 10);
 
-    console.log(`[Admin] [MVC] Actualizando Partido ${idPartidoInt} con marcador ${gLocalInt}-${gVisitanteInt}`);
+    console.log(`[Admin] [MVC] Actualizando Partido Real ${idPartidoInt} con marcador ${gLocalInt}-${gVisitanteInt}`);
 
-    // 1. CAPA MODELO: Guardar el resultado real usando la función nativa del modelo Partido
+    // 1. 🏛️ CAPA MODELO: Guarda el resultado en la tabla partidos (goles_local_real, goles_visitante_real)
     await Partido.actualizarResultado(idPartidoInt, gLocalInt, gVisitanteInt);
 
-    // 2. CAPA CONTROLADOR CRUZADO: Preparar el entorno simulado para el motor analítico de puntos
+    // 2. 🚀 CAPA CONTROLADOR CRUZADO: Preparamos el objeto req exacto que espera tu motor de puntos
+    // Pasamos tanto la nomenclatura plana como la real de la BD para asegurar compatibilidad total
     const mockReq = {
       body: {
         id_partido: idPartidoInt,
@@ -86,19 +87,22 @@ export const registrarMarcadorOficial = async (req, res) => {
       }
     };
 
+    // Objeto de respuesta simulado para capturar los logs del motor en Railway
     const mockRes = {
-      status: () => ({
-        json: (data) => console.log(`[Motor Puntos DB]: ${data.mensaje}`)
-      })
+      status: function(code) {
+        return {
+          json: (data) => console.log(`[Motor Puntos - Status ${code}]: ${data.mensaje}`)
+        };
+      }
     };
 
-    // Forzamos el await para asegurar que Railway procese las apuestas antes de cerrar la petición del cliente
+    // Ejecutamos el motor de puntos esperando a que termine de actualizar la tabla de apuestas
     await calcularPuntosPartidos(mockReq, mockRes);
 
-    // 3. RESPUESTA (VISTA/JSON): Retornar confirmación exitosa al Frontend en Vercel
+    // 3. 📤 RESPUESTA: Confirmación exitosa de fin de flujo
     return res.status(200).json({ 
       ok: true, 
-      mensaje: '¡Marcador oficial registrado en el modelo y apuestas liquidadas exitosamente!' 
+      mensaje: '¡Marcador oficial registrado y tabla de apuestas recalculada con éxito!' 
     });
 
   } catch (error) {
