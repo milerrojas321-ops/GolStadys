@@ -103,12 +103,19 @@ export const obtenerApuestasUsuario = async (req, res) => {
 };
 
 export const calcularPuntosPartidos = async (req, res) => {
-  // Soportamos ambos formatos de nombres por si acaso (goles_local o goles_local_real)
-  const id_partido = req.body.id_partido;
-  const goles_local = req.body.goles_local !== undefined ? req.body.goles_local : req.body.goles_local_real;
-  const goles_visitante = req.body.goles_visitante !== undefined ? req.body.goles_visitante : req.body.goles_visitante_real;
+  // 🔥 SOLUCIÓN EXTRACCIÓN: Busca el ID tanto en los parámetros de la URL como en el cuerpo de la petición
+  const id_partido = req.body?.id_partido || req.params?.id_partido || req.params?.idPartido;
+  
+  // Captura flexible para los goles reales ingresados
+  const goles_local = req.body?.goles_local !== undefined ? req.body.goles_local : req.body?.goles_local_real;
+  const goles_visitante = req.body?.goles_visitante !== undefined ? req.body.goles_visitante : req.body?.goles_visitante_real;
 
   try {
+    if (!id_partido) {
+      console.log("❌ [Motor de Puntos] -> Error: No se recibió ningún id_partido válido.");
+      return res.status(400).json({ ok: false, mensaje: 'ID de partido no proporcionado.' });
+    }
+
     console.log(`[Motor de Puntos] -> Iniciando procesamiento para partido ID: ${id_partido}. Marcador oficial: ${goles_local}-${goles_visitante}`);
 
     // 1. Convertir los goles reales ingresados a números enteros
@@ -127,7 +134,7 @@ export const calcularPuntosPartidos = async (req, res) => {
       console.log(`⚠️ [Motor de Puntos] -> No se encontraron apuestas con estado 'pendiente' para el partido ${id_partido}`);
       return res.status(200).json({
         ok: true,
-        mensaje: 'Marcador registrado, pero no había apuestas con estado pendiente para este partido.'
+        mensaje: 'Marcador registrado, pero no había apuestas con estado pendiente para este partido o el ID es inválido.'
       });
     }
 
@@ -156,7 +163,7 @@ export const calcularPuntosPartidos = async (req, res) => {
       else if (tendenciaPredicha === tendenciaReal && (pLocal === goles_local_real || pVisitante === goles_visitante_real)) {
         puntosGanados = 3;
       } 
-      // 🥉 REGLA 3: Acertó solo la tendencia general (2 Puntos como tenías en tu regla de negocio)
+      // 🥉 REGLA 3: Acertó solo la tendencia general (2 Puntos)
       else if (tendenciaPredicha === tendenciaReal) {
         puntosGanados = 2;
       } 
