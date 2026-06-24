@@ -84,7 +84,7 @@ const Apuesta = {
 
             // 1. Actualizar el estado (usando 'finalizado') y los puntos de esta apuesta individual
             await connection.query(
-                "UPDATE apuestas SET puntos_ganados_apuesta = ?, estado_apuesta = 'finalizado' WHERE id_apuesta = ?",
+                "UPDATE apuestas SET puntos_ganados_apuesta = ?, estado_apuesta = 'hecho' WHERE id_apuesta = ?",
                 [puntos, id_apuesta]
             );
 
